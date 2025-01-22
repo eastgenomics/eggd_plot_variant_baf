@@ -3,12 +3,28 @@
 # @input - list of files in tsv format with "CHROM", "POS", "DP" and "AD"
 # @output - png plot of BAF and binned Depth values for each file
 #
-# Fixed integer values
-#
-# MIN_DEPTH - Depth threshold for variant filtering
-# BIN_SIZE - Number of variants to aggregate, based on position for depth calculations
-# MAX_DEPTH_PLOT - Maximum depth value for Y axis in depth plot
-#
+# Constraints
+##################
+# The genome parameter in the plotkaryotype function defaults to hg19
+# Depth values that are higher than the max value in Y axis will be plotted in the BAF plot
+# Only .tsv files can be provided
+
+
+# Configurables
+##################
+
+# Variants with depth below this threshold are excluded
+MIN_DEPTH <- 50
+
+# Used to aggregate depth values for smoother visualization
+BIN_SIZE <- 1000
+
+# Adjusts the Y-axis plot for mean_depth values
+MAX_DEPTH_PLOT <- 750
+
+# Chromosome labels to feature in the plot X-axis
+CHR_NAMES <- c(paste0(1:22), "X", "Y")
+
 
 # Load required modules
 ##################################
@@ -23,11 +39,7 @@ library(polars, quietly = TRUE)
 # Function to read files into dfs
 # @parameter file
 # @parameter min_depth, minimum depth for variant filtering
-# variants with depth below this threshold are excluded
 # returns trimmed_df
-
-# Variants with depth below this threshold are excluded
-MIN_DEPTH <- 50
 
 read_to_df <- function(file, min_depth = MIN_DEPTH) {
   if (!file.exists(file)) {
@@ -35,11 +47,11 @@ read_to_df <- function(file, min_depth = MIN_DEPTH) {
   }
   df <- read.table(file = file, header = FALSE)
   if (ncol(df) != 4) {
-  stop("Invalid TSV format: Expected 4 columns (CHROM, POS, DP, AD)")
+    stop("Invalid TSV format: Expected 4 columns (CHROM, POS, DP, AD)")
   }
   colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
   if (!all(sapply(df[c("Position", "Depth")], is.numeric))) {
-  stop("Invalid TSV format: Position and Depth must be numeric")
+    stop("Invalid TSV format: Position and Depth must be numeric")
   }
 
   # calculate BAF
@@ -47,8 +59,8 @@ read_to_df <- function(file, min_depth = MIN_DEPTH) {
   df$RAF <- as.numeric(df$Ref_AD)
   df$BAF <- as.numeric(df$Alt_DP)
   # Avoid division by zero
-  df$RAF <- ifelse(df$Depth > 0, df$Ref_AD/df$Depth, NA)
-  df$BAF <- ifelse(df$Depth > 0, df$Alt_DP/df$Depth, NA)
+  df$RAF <- ifelse(df$Depth > 0, as.numeric(df$Ref_AD) / df$Depth, NA)
+  df$BAF <- ifelse(df$Depth > 0, as.numeric(df$Alt_DP) / df$Depth, NA)
   df_trimmed <- df[df$Depth > min_depth, ]
 
   return(df_trimmed)
@@ -58,9 +70,6 @@ read_to_df <- function(file, min_depth = MIN_DEPTH) {
 # @parameter df
 # @parameter bin_size - integer: length of window for variant aggregation
 # returns df_binned
-
-# Used to aggregate depth values for smoother visualization
-BIN_SIZE <- 1000
 
 bin_df <- function(df, bin_size = BIN_SIZE) {
   polars_df <- as_polars_df(df)
@@ -103,16 +112,13 @@ get_snp_data_Depth <- function(df) {
 # @parameter max_depth_plot - integer :maximum depth value for y-axis in plots
 # returns plot
 
-# Adjusts the vertical scale of depth visualization
-MAX_DEPTH_PLOT <- 750
-
-get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = MAX_DEPTH_PLOT) {
+get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = MAX_DEPTH_PLOT, chr_names = CHR_NAMES) {
   file_name_png <- paste0(sub(".tsv", "", file_name), ".png")
-  png(file_name_png, width = 2500, height = 750)
-
+  png(file_name_png, width = 1500, height = 500)
   plot_parameters <- getDefaultPlotParams(plot.type = 4)
   plot_parameters$data1inmargin <- 2
-  baf_depth_plot <- plotKaryotype(plot.type = 4, ideogram.plotter = NULL, plot.params = plot_parameters)
+  baf_depth_plot <- plotKaryotype(plot.type = 4, ideogram.plotter = NULL, plot.params = plot_parameters, labels.plotter = NULL)
+  kpAddChromosomeNames(baf_depth_plot, chr.names = chr_names)
   kpAddCytobandsAsLine(baf_depth_plot) # Add centromers
   # top graph
   kpAxis(baf_depth_plot, r0 = 0.55, r1 = 1)
