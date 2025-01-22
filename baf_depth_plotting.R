@@ -130,7 +130,7 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = M
   kpAxis(baf_depth_plot, r0 = 0, r1 = 0.45, ymax = max_depth_plot, ymin = 0)
   kpPoints(baf_depth_plot,
     data = snp.data.depth, y = snp.data.depth$mean_depth,
-    cex = 0.5, r0 = 0, r1 = 0.45, ymax = max_depth_plot, ymin = 0, col = "darkblue"
+    cex = 0.7, r0 = 0, r1 = 0.45, ymax = max_depth_plot, ymin = 0, col = "darkblue"
   )
   kpAddMainTitle(baf_depth_plot, main = "BAF vs Depth")
   kpAddChromosomeSeparators(baf_depth_plot, col = "darkgray", lty = 3, data.panel = "all")
