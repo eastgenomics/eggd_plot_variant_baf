@@ -39,8 +39,11 @@ read_to_df <- function(file, min_depth = MIN_DEPTH) {
 
   # calculate BAF
   df[c("Ref_AD", "Alt_DP")] <- str_split_fixed(df$Allele_Depth, ",", 2)
-  df$RAF <- as.numeric(df$Ref_AD) / df$Depth
-  df$BAF <- as.numeric(df$Alt_DP) / df$Depth
+  df$RAF <- as.numeric(df$Ref_AD)
+  df$BAF <- as.numeric(df$Alt_DP)
+  # Avoid division by zero
+  df$RAF <- ifelse(df$Depth > 0, df$Ref_AD/df$Depth, NA)
+  df$BAF <- ifelse(df$Depth > 0, df$Alt_DP/df$Depth, NA)
   df_trimmed <- df[df$Depth > min_depth, ]
 
   return(df_trimmed)
