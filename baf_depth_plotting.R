@@ -34,8 +34,13 @@ read_to_df <- function(file, min_depth = MIN_DEPTH) {
     stop("File not found: ", file)
   }
   df <- read.table(file = file, header = FALSE)
+  if (ncol(df) != 4) {
+  stop("Invalid TSV format: Expected 4 columns (CHROM, POS, DP, AD)")
+  }
   colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
-  df$Chr <- sub("chr", "", df$Chr) # remove chr
+  if (!all(sapply(df[c("Position", "Depth")], is.numeric))) {
+  stop("Invalid TSV format: Position and Depth must be numeric")
+  }
 
   # calculate BAF
   df[c("Ref_AD", "Alt_DP")] <- str_split_fixed(df$Allele_Depth, ",", 2)
