@@ -1,0 +1,50 @@
+{
+    "name": "eggd_plot_variant_baf",
+    "title": "eggd_plot_variant_baf",
+    "summary": "eggd_plot_variant_baf",
+    "version": "1.0.0",
+    "inputSpec":
+    [
+      {
+        "name": "vcf",
+        "label": "Merged Small Variants",
+        "class": "file",
+        "optional": false,
+        "patterns": [
+          "*.vcf$"
+        ],
+        "help": "Merged Small Variants"
+      }
+    ],
+    "outputSpec": [
+      {
+         "name": "baf_plot",
+        "label": "BAFs Plot",
+        "help": "",
+        "class": "file",
+         "patterns": ["*.png"]
+      }
+    ],
+    "runSpec": {
+      "interpreter": "bash" ,
+      "file": "src/script.sh",
+      "systemRequirements": {
+        "*": {
+          "instanceType": "mem2_ssd1_v2_x4"
+        }
+      },    
+      "distribution": "Ubuntu",
+      "release": "24.04",
+      "version": "0",
+      "execDepends": []
+    },
+    "openSource": true,
+   
+    "access": {                         
+    "network": [                       
+      "*"                             
+    ],
+    "project": "CONTRIBUTE",
+    "allProjects": "VIEW"
+  }
+}
