@@ -13,6 +13,10 @@
 # Configurables
 ##################
 
+# Variants with BAF < 0.05 and > 0.95 are excluded
+MIN_BAF <- 0.04
+MAX_BAF <- 0.96
+
 # Variants with depth below this threshold are excluded
 MIN_DEPTH <- 50
 
@@ -114,23 +118,25 @@ get_snp_data_Depth <- function(df) {
 
 get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = MAX_DEPTH_PLOT, chr_names = CHR_NAMES) {
   file_name_png <- paste0(sub(".tsv", "", file_name), ".png")
-  png(file_name_png, width = 1500, height = 500)
+  png(file_name_png, width = 15, height = 5, units = "in", res = 600)
   plot_parameters <- getDefaultPlotParams(plot.type = 4)
   plot_parameters$data1inmargin <- 2
   baf_depth_plot <- plotKaryotype(plot.type = 4, ideogram.plotter = NULL, plot.params = plot_parameters, labels.plotter = NULL)
   kpAddChromosomeNames(baf_depth_plot, chr.names = chr_names)
   kpAddCytobandsAsLine(baf_depth_plot) # Add centromers
   # top graph
-  kpAxis(baf_depth_plot, r0 = 0.55, r1 = 1)
+  baf_threshold <- which(snp.data.baf$BAF > min_baf & snp.data.baf$BAF < max_baf)
+  kpAxis(baf_depth_plot, r0 = 0.55, r1 = 1, tick.pos = c(0,0.25,0.5,0.75,1))
+  #kpAbline(baf_depth_plot, col="gray", h=c(0.25,0.5,0.75), r0 = 0.55, r1 = 1, lty = 1)
   kpPoints(baf_depth_plot,
-    data = snp.data.baf, y = snp.data.baf$BAF,
+    data = snp.data.baf[baf_threshold], y = snp.data.baf[baf_threshold]$BAF,
     cex = 0.5, r0 = 0.55, r1 = 1, col = "darkorange2"
   )
   # bottom graph
   kpAxis(baf_depth_plot, r0 = 0, r1 = 0.45, ymax = max_depth_plot, ymin = 0)
   kpPoints(baf_depth_plot,
     data = snp.data.depth, y = snp.data.depth$mean_depth,
-    cex = 0.7, r0 = 0, r1 = 0.45, ymax = max_depth_plot, ymin = 0, col = "darkblue"
+    cex = 0.5, r0 = 0, r1 = 0.45, ymax = max_depth_plot, ymin = 0, col = "darkblue"
   )
   kpAddMainTitle(baf_depth_plot, main = "BAF vs Depth")
   kpAddChromosomeSeparators(baf_depth_plot, col = "darkgray", lty = 3, data.panel = "all")
