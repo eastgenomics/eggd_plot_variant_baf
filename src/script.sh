@@ -3,8 +3,7 @@ set -exo pipefail
 
 main() {
 
-    sudo apt-get update
-    sudo apt-get install -y libssl-dev libxml2-dev gcc pkg-config bcftools
+    sudo apt-get install -y bcftools
 
     #Rscript packages.R
     tar -xzvf R_packages.tar.gz
