@@ -8,7 +8,7 @@
 # The genome parameter in the plotkaryotype function defaults to hg19
 # Depth values that are higher than the max value in Y axis will be plotted in the BAF plot
 # Only .tsv files can be provided
-
+# Chromosome names need to be provided as it defaults to include "chr"
 
 # Configurables
 ##################
@@ -28,7 +28,6 @@ MAX_DEPTH_PLOT <- 750
 
 # Chromosome labels to feature in the plot X-axis
 CHR_NAMES <- c(paste0(1:22), "X", "Y")
-
 
 # Load required modules
 ##################################
@@ -113,10 +112,12 @@ get_snp_data_Depth <- function(df) {
 
 # Function to create a karyoploteR plot of BAF vs binned Depth
 # @parameters snp.data.bf, snp.data.depth, file_name
-# @parameter max_depth_plot - integer :maximum depth value for y-axis in plots
+# @parameter max_depth_plot - integer : maximum depth value for y-axis in plots
+# @parameter chr_names - vector with chromosomes to be listed
+# @parameters min_baf and max_baf - integers : include only variants within range
 # returns plot
 
-get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = MAX_DEPTH_PLOT, chr_names = CHR_NAMES) {
+get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = MAX_DEPTH_PLOT, chr_names = CHR_NAMES, min_baf = MIN_BAF, max_baf = MAX_BAF) {
   file_name_png <- paste0(sub(".tsv", "", file_name), ".png")
   png(file_name_png, width = 15, height = 5, units = "in", res = 600)
   plot_parameters <- getDefaultPlotParams(plot.type = 4)
@@ -126,8 +127,7 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = M
   kpAddCytobandsAsLine(baf_depth_plot) # Add centromers
   # top graph
   baf_threshold <- which(snp.data.baf$BAF > min_baf & snp.data.baf$BAF < max_baf)
-  kpAxis(baf_depth_plot, r0 = 0.55, r1 = 1, tick.pos = c(0,0.25,0.5,0.75,1))
-  #kpAbline(baf_depth_plot, col="gray", h=c(0.25,0.5,0.75), r0 = 0.55, r1 = 1, lty = 1)
+  kpAxis(baf_depth_plot, r0 = 0.55, r1 = 1, tick.pos = c(0, 0.25, 0.5, 0.75, 1))
   kpPoints(baf_depth_plot,
     data = snp.data.baf[baf_threshold], y = snp.data.baf[baf_threshold]$BAF,
     cex = 0.5, r0 = 0.55, r1 = 1, col = "darkorange2"
