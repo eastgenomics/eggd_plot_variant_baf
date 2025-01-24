@@ -13,7 +13,7 @@
 # Configurables
 ##################
 
-# Variants with BAF < 0.05 and > 0.95 are excluded
+# Minimum and maximum thresholds of BAFs to be plotted
 MIN_BAF <- 0.04
 MAX_BAF <- 0.96
 
@@ -114,7 +114,7 @@ get_snp_data_Depth <- function(df) {
 # @parameters snp.data.bf, snp.data.depth, file_name
 # @parameter max_depth_plot - integer : maximum depth value for y-axis in plots
 # @parameter chr_names - vector with chromosomes to be listed
-# @parameters min_baf and max_baf - integers : include only variants within range
+# @parameters min_baf and max_baf - integers : include only variants in range 0.4 < BAF < 0.96
 # returns plot
 
 get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = MAX_DEPTH_PLOT, chr_names = CHR_NAMES, min_baf = MIN_BAF, max_baf = MAX_BAF) {
