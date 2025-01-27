@@ -3,13 +3,14 @@ set -exo pipefail
 
 main() {
 
-    sudo apt-get install -y bcftools
-
-    #Rscript packages.R
-    tar -xzvf R_packages.tar.gz
-   
-
     dx-download-all-inputs
+
+    sudo dpkg -i libtinfo5_6.2-0ubuntu2_amd64.deb
+    sudo dpkg -i libncurses5_6.2-0ubuntu2_amd64.deb
+    sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+
+    tar -xzf $packages_path
+    echo "R_LIBS_USER=~/R/library" >> ~/.Renviron
 
     bcftools query -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' $vcf_path -o "$vcf_prefix.vcf.bed"
 

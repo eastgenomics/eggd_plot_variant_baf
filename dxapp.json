@@ -14,6 +14,16 @@
           "*.vcf$"
         ],
         "help": "Merged Small Variants"
+      },
+      {
+        "name": "packages",
+        "label": "R Packages",
+        "class": "file",
+        "optional": false,
+        "patterns": [
+          "*.tar.gz$"
+        ],
+        "help": "R packages"
       }
     ],
     "outputSpec": [
@@ -32,7 +42,15 @@
         "*": {
           "instanceType": "mem2_ssd1_v2_x4"
         }
-      },    
+      },
+      "assetDepends": [
+        {
+          "name": "htslib",
+          "project": "project-Fkb6Gkj433GVVvj73J7x8KbV",
+          "folder": "/app_assets/htslib/htslib_v1.15.0",
+          "version": "1.15.0"
+        }
+      ],
       "distribution": "Ubuntu",
       "release": "24.04",
       "version": "0",
