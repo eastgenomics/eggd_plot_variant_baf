@@ -1,4 +1,4 @@
-.libPaths('~/R/library')
+#.libPaths('~/R/library')
 library(stringr)
 library(karyoploteR)
 library(biomaRt)
