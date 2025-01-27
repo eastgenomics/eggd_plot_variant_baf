@@ -1,7 +1,7 @@
 {
     "name": "eggd_plot_variant_baf",
     "title": "eggd_plot_variant_baf",
-    "summary": "eggd_plot_variant_baf",
+    "summary": "Plot BAF and Depth with Karyoploter",
     "version": "1.0.0",
     "inputSpec":
     [
@@ -23,7 +23,7 @@
         "patterns": [
           "*.tar.gz$"
         ],
-        "help": "R packages"
+        "help": "Tarball of compiled R packages"
       }
     ],
     "outputSpec": [
@@ -36,6 +36,11 @@
       }
     ],
     "runSpec": {
+      "timeoutPolicy": {
+        "*": {
+          "hours": 1
+        }
+      },
       "interpreter": "bash" ,
       "file": "src/script.sh",
       "systemRequirements": {
@@ -59,10 +64,10 @@
     "openSource": true,
    
     "access": {                         
-    "network": [                       
-      "*"                             
-    ],
-    "project": "CONTRIBUTE",
-    "allProjects": "VIEW"
-  }
+      "network": ["*"],
+      "project": "CONTRIBUTE",
+      "allProjects": "VIEW"
+  },
+  "developers": ["org-emee_1"],
+  "authorizedUsers": ["org-emee_1"]
 }

@@ -12,9 +12,9 @@ main() {
     tar -xzf $packages_path
     echo "R_LIBS_USER=~/R/library" >> ~/.Renviron
 
-    bcftools query -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' $vcf_path -o "$vcf_prefix.vcf.bed"
+    bcftools query -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' $vcf_path -o "$vcf_prefix.vcf.tsv"
 
-    Rscript bafs_plot.R
+    Rscript baf_depth_plotting.R
     
     mkdir -p out/baf_plot
     mv *.png out/baf_plot
