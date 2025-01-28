@@ -9,6 +9,7 @@ Plots BAF and depth of variants from given VCF
 1. A VCF file (`.vcf`) - containing the merged small variants we want to plot.
 2. R packages (`.tar.gz`) - compressed tarball of R packages needed to generate plot.
 <br>
+
 **R Packages and Versions:**
 
 - `stringr` (v1.5.1)
@@ -22,12 +23,13 @@ The package was built on Ubuntu 24.04 and R v4.3. Below are the steps:
 ```
 sudo apt-get update
 sudo apt-get install -y libssl-dev libxml2-dev gcc pkg-config
-
 ```
 2. Run the R script to install the required R packages:
+
 `Rscript scripts/packages.R`
 
 3. Compress the R library folder:
+
 `tar -czvf R_packages.tar.gz R/library`
 
 
