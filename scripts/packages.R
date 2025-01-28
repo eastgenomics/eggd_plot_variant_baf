@@ -18,11 +18,11 @@ if (!requireNamespace("BiocManager", quietly = TRUE)) {
 
 # Install karyoploteR using Bioconductor v3.18 (latest in R v4.3)
 # https://bioconductor.org/news/bioc_3_18_release/
-# BiocManager installs the version of packages that was released in the specified bioconductor release
+# BiocManager installs the version of packages that was released in the specified bioconductor version (karyoploterR v1.28.0)
 BiocManager::install(
   "karyoploteR",
-  version = "3.18",  # Bioconductor release version (not package version); installs karyoploterR v1.28.0
-  lib = libPath,
+  version = "3.18",
+  lib = libPath
 )
 
 # Install polars from GitHub release
