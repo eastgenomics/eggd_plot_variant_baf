@@ -1,0 +1,72 @@
+{
+    "name": "eggd_plot_variant_baf",
+    "title": "eggd_plot_variant_baf",
+    "summary": "Plot BAF and Depth with Karyoploter",
+    "version": "1.0.0",
+    "inputSpec":
+    [
+      {
+        "name": "vcf",
+        "label": "VCF",
+        "class": "file",
+        "optional": false,
+        "patterns": [
+          "*.vcf$", "*.vcf.gz$"
+        ],
+        "help": "VCF"
+      },
+      {
+        "name": "packages",
+        "label": "R Packages",
+        "class": "file",
+        "optional": false,
+        "patterns": [
+          "*.tar.gz$"
+        ],
+        "help": "Tarball of compiled R packages"
+      }
+    ],
+    "outputSpec": [
+      {
+        "name": "baf_plot",
+        "label": "BAFs Plot",
+        "help": "",
+        "class": "file",
+        "patterns": ["*.png"]
+      }
+    ],
+    "runSpec": {
+      "timeoutPolicy": {
+        "*": {
+          "hours": 1
+        }
+      },
+      "interpreter": "bash" ,
+      "file": "src/script.sh",
+      "systemRequirements": {
+        "*": {
+          "instanceType": "mem1_ssd2_v2_x4"
+        }
+      },
+      "assetDepends": [
+        {
+          "name": "htslib",
+          "project": "project-Fkb6Gkj433GVVvj73J7x8KbV",
+          "folder": "/app_assets/htslib/htslib_v1.15.0",
+          "version": "1.15.0"
+        }
+      ],
+      "distribution": "Ubuntu",
+      "release": "24.04",
+      "version": "0",
+      "execDepends": []
+    },
+    "openSource": true,
+   
+    "access": {                         
+      "project": "CONTRIBUTE",
+      "allProjects": "VIEW"
+  },
+  "developers": ["org-emee_1"],
+  "authorizedUsers": ["org-emee_1"]
+}
