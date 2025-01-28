@@ -7,13 +7,13 @@
     [
       {
         "name": "vcf",
-        "label": "Merged Small Variants",
+        "label": "VCF",
         "class": "file",
         "optional": false,
         "patterns": [
-          "*.vcf$"
+          "*.vcf$", "*.vcf.gz$"
         ],
-        "help": "Merged Small Variants"
+        "help": "VCF"
       },
       {
         "name": "packages",
@@ -28,11 +28,11 @@
     ],
     "outputSpec": [
       {
-         "name": "baf_plot",
+        "name": "baf_plot",
         "label": "BAFs Plot",
         "help": "",
         "class": "file",
-         "patterns": ["*.png"]
+        "patterns": ["*.png"]
       }
     ],
     "runSpec": {
@@ -45,7 +45,7 @@
       "file": "src/script.sh",
       "systemRequirements": {
         "*": {
-          "instanceType": "mem2_ssd1_v2_x4"
+          "instanceType": "mem2_ssd2_v2_x4"
         }
       },
       "assetDepends": [
@@ -64,7 +64,6 @@
     "openSource": true,
    
     "access": {                         
-      "network": ["*"],
       "project": "CONTRIBUTE",
       "allProjects": "VIEW"
   },
