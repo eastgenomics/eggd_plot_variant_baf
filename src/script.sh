@@ -1,5 +1,13 @@
 #!/bin/bash
+
+# prefixes all lines of commands written to stdout with datetime
+PS4='\000[$(date)]\011'
+export TZ=Europe/London
 set -exo pipefail
+
+# set frequency of instance usage in logs to 10 seconds
+kill $(ps aux | grep pcp-dstat | head -n1 | awk '{print $2}')
+/usr/bin/dx-dstat 10
 
 main() {
 
@@ -14,7 +22,10 @@ main() {
 
     bcftools query -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' $vcf_path -o "$vcf_prefix.vcf.tsv"
 
-    Rscript baf_depth_plotting.R
+    if ! Rscript baf_depth_plotting.R; then
+    echo "Error: BAF plotting failed with exit code $?" >&2
+    exit 1
+    fi
     
     mkdir -p out/baf_plot
     mv *.png out/baf_plot

@@ -17,7 +17,7 @@ Plots BAF and depth of variants from given VCF
 - `polars` (v0.22.0)
 
 **How to build the package**
-The package was built on Ubuntu 24.04. Below are the steps:
+The package was built on Ubuntu 24.04 and R v4.3. Below are the steps:
 1. Update and install the required dependencies:
 ```
 sudo apt-get update
