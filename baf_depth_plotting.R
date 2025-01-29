@@ -127,6 +127,9 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = M
   kpAddCytobandsAsLine(baf_depth_plot) # Add centromers
   # top graph
   baf_threshold <- which(snp.data.baf$BAF > min_baf & snp.data.baf$BAF < max_baf)
+  modified_high_depth <- snp.data.depth$mean_depth > 750 # get values above 750
+  snp.data.depth$mean_depth <- pmin(snp.data.depth$mean_depth, 750) # assign the max to 750
+  modified_depth <- ifelse(modified_high_depth, 'darkgreen', 'darkblue') # Assign colors based on the modified values
   kpAxis(baf_depth_plot, r0 = 0.55, r1 = 1, tick.pos = c(0, 0.25, 0.5, 0.75, 1))
   kpPoints(baf_depth_plot,
     data = snp.data.baf[baf_threshold], y = snp.data.baf[baf_threshold]$BAF,
@@ -136,7 +139,7 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = M
   kpAxis(baf_depth_plot, r0 = 0, r1 = 0.45, ymax = max_depth_plot, ymin = 0)
   kpPoints(baf_depth_plot,
     data = snp.data.depth, y = snp.data.depth$mean_depth,
-    cex = 0.5, r0 = 0, r1 = 0.45, ymax = max_depth_plot, ymin = 0, col = "darkblue"
+    cex = 0.5, r0 = 0, r1 = 0.45, ymax = max_depth_plot, ymin = 0, col = modified_depth
   )
   kpAddMainTitle(baf_depth_plot, main = "BAF vs Depth")
   kpAddChromosomeSeparators(baf_depth_plot, col = "darkgray", lty = 3, data.panel = "all")
