@@ -65,7 +65,7 @@
    
     "access": {                         
       "project": "CONTRIBUTE",
-      "allProjects": "VIEW"
+      "allProjects": "CONTRIBUTE"
   },
   "developers": ["org-emee_1"],
   "authorizedUsers": ["org-emee_1"]
