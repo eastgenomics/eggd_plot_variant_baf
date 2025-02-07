@@ -17,9 +17,6 @@
 MIN_BAF <- 0.04
 MAX_BAF <- 0.96
 
-# Variants with depth below this threshold are excluded
-MIN_DEPTH <- 50
-
 # Used to aggregate depth values for smoother visualization
 BIN_SIZE <- 1000
 
@@ -41,10 +38,9 @@ library(polars, quietly = TRUE)
 
 # Function to read files into dfs
 # @parameter file
-# @parameter min_depth, minimum depth for variant filtering
-# returns trimmed_df
+# returns df
 
-read_to_df <- function(file, min_depth = MIN_DEPTH) {
+read_to_df <- function(file) {
   if (!file.exists(file)) {
     stop("File not found: ", file)
   }
@@ -53,6 +49,7 @@ read_to_df <- function(file, min_depth = MIN_DEPTH) {
     stop("Invalid TSV format: Expected 4 columns (CHROM, POS, DP, AD)")
   }
   colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
+  df <- df[!is.na(df$Allele_Depth) & !is.na(df$Depth), ]
   if (!all(sapply(df[c("Position", "Depth")], is.numeric))) {
     stop("Invalid TSV format: Position and Depth must be numeric")
   }
@@ -64,9 +61,8 @@ read_to_df <- function(file, min_depth = MIN_DEPTH) {
   # Avoid division by zero
   df$RAF <- ifelse(df$Depth > 0, as.numeric(df$Ref_AD) / df$Depth, NA)
   df$BAF <- ifelse(df$Depth > 0, as.numeric(df$Alt_DP) / df$Depth, NA)
-  df_trimmed <- df[df$Depth > min_depth, ]
 
-  return(df_trimmed)
+  return(df)
 }
 
 # Function to return dfs with binned depth
@@ -87,7 +83,7 @@ bin_df <- function(df, bin_size = BIN_SIZE) {
 }
 
 # Function to create snp.data.baf format as input to karyoploteR plot BAF
-# @parameter df, use a trimmed df
+# @parameter df
 # returns snp.data for baf plot
 
 get_snp_data_BAF <- function(df) {
@@ -111,10 +107,10 @@ get_snp_data_Depth <- function(df) {
 }
 
 # Function to create a karyoploteR plot of BAF vs binned Depth
-# @parameters snp.data.bf, snp.data.depth, file_name
+# @parameters snp.data.baf, snp.data.depth, file_name
 # @parameter max_depth_plot - integer : maximum depth value for y-axis in plots
 # @parameter chr_names - vector with chromosomes to be listed
-# @parameters min_baf and max_baf - integers : include only variants in range 0.4 < BAF < 0.96
+# @parameters min_baf and max_baf - integers : include only variants in range min_baf < BAF < max_baf
 # returns plot
 
 get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = MAX_DEPTH_PLOT, chr_names = CHR_NAMES, min_baf = MIN_BAF, max_baf = MAX_BAF) {
@@ -129,8 +125,12 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = M
   baf_threshold <- which(snp.data.baf$BAF > min_baf & snp.data.baf$BAF < max_baf)
   modified_high_depth <- snp.data.depth$mean_depth > 750 # get values above 750
   snp.data.depth$mean_depth <- pmin(snp.data.depth$mean_depth, 750) # assign the max to 750
-  modified_depth <- ifelse(modified_high_depth, 'darkgreen', 'darkblue') # Assign colors based on the modified values
+  modified_depth <- ifelse(
+    modified_high_depth, 'darkgreen',
+    ifelse(snp.data.depth$mean_depth < 50 , "white",'darkblue')
+  ) # Assign colors based on the mean_depth
   kpAxis(baf_depth_plot, r0 = 0.55, r1 = 1, tick.pos = c(0, 0.25, 0.5, 0.75, 1))
+  kpAbline(baf_depth_plot, h=c(0.25, 0.5, 0.75), lty = 0.5, r0 =0.55, r1=1)
   kpPoints(baf_depth_plot,
     data = snp.data.baf[baf_threshold], y = snp.data.baf[baf_threshold]$BAF,
     cex = 0.5, r0 = 0.55, r1 = 1, col = "darkorange2"
