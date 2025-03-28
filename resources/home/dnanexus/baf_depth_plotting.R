@@ -10,22 +10,6 @@
 # Only .tsv files can be provided
 # Chromosome names need to be provided as it defaults to include "chr"
 
-# Configurables
-##################
-
-# Minimum and maximum thresholds of BAFs to be plotted
-MIN_BAF <- 0.04
-MAX_BAF <- 0.96
-
-# Used to aggregate depth values for smoother visualization
-BIN_SIZE <- 1000
-
-# Adjusts the Y-axis plot for mean_depth values
-MAX_DEPTH_PLOT <- 750
-
-# Chromosome labels to feature in the plot X-axis
-CHR_NAMES <- c(paste0(1:22), "X", "Y")
-
 # Load required modules
 ##################################
 library(stringr, quietly = TRUE)
@@ -34,32 +18,49 @@ library(dplyr, quietly = TRUE)
 library(polars, quietly = TRUE)
 library(argparse, quietly = TRUE)
 
+# Get configurable inputs via command line
+####################################################
 
 # create parser object
 parser <- ArgumentParser()
 
 # specify our desired options 
 # by default ArgumentParser will add an help option 
-parser$add_argument("-v", "--verbose", action="store_true", default=TRUE,
-    help="Print extra output [default]")
-parser$add_argument("-q", "--quietly", action="store_false", 
-    dest="verbose", help="Print little output")
-parser$add_argument("-c", "--count", type="integer", default=5, 
-    help="Number of random normals to generate [default %(default)s]",
-    metavar="number")
-parser$add_argument("--generator", default="rnorm", 
-    help = "Function to generate random deviates [default \"%(default)s\"]")
-parser$add_argument("--mean", default=0, type="double",
-    help="Mean if generator == \"rnorm\" [default %(default)s]")
-parser$add_argument("--sd", default=1, type="double",
-        metavar="standard deviation",
+parser$add_argument("--min_baf", type="double", default=0.04,
+    help="Minimum BAF threshold displayed [default %(default)s]")
+parser$add_argument("--max_baf", type="double", default=0.96
+    help="Maximum BAF threshold displayed [default %(default)s]")
+parser$add_argument("--bin_size", type="integer", default=1000, 
+    help="Bin size plot [default %(default)s]")
+parser$add_argument("--max_depth_plot", type="integer", default=750, 
+    help = "Max depth to be shown on plot [default %(default)s]")
+parser$add_argument("--min_depth", type="integer", default=50,
+    help="Minimum depth allowed [default %(default)s]")
+parser$add_argument("--chr_names", type="double", default=c(paste0(1:22), "X", "Y"),
     help="Standard deviation if generator == \"rnorm\" [default %(default)s]")
                                         
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults, 
 args <- parser$parse_args()
 
+# Configurables
+##################
 
+# Minimum and maximum thresholds of BAFs to be plotted
+MIN_BAF <- args.min_baf
+MAX_BAF <- args.max_baf
+
+# Used to aggregate depth values for smoother visualization
+BIN_SIZE <- args.bin_size
+
+# Adjusts the Y-axis plot for mean_depth values
+MAX_DEPTH_PLOT <- args.max_depth_plot
+
+# Chromosome labels to feature in the plot X-axis
+CHR_NAMES <- args.chr_names
+
+# Minimum depth
+MIN_DEPTH <- args.min_depth
 
 # List of functions
 ##################################
@@ -151,11 +152,11 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = M
   kpAddCytobandsAsLine(baf_depth_plot) # Add centromers
   # top graph
   baf_threshold <- which(snp.data.baf$BAF > min_baf & snp.data.baf$BAF < max_baf)
-  modified_high_depth <- snp.data.depth$mean_depth > 750 # get values above 750
+  modified_high_depth <- snp.data.depth$mean_depth > 750 # get values above 750                     # does this need to be pinned to the MAX_DEPTH_PLOT?
   snp.data.depth$mean_depth <- pmin(snp.data.depth$mean_depth, 750) # assign the max to 750
   modified_depth <- ifelse(
     modified_high_depth, 'darkgreen',
-    ifelse(snp.data.depth$mean_depth < 50 , "white",'darkblue')
+    ifelse(snp.data.depth$mean_depth < MIN_DEPTH , "white",'darkblue')
   ) # Assign colors based on the mean_depth
   kpAxis(baf_depth_plot, r0 = 0.55, r1 = 1, tick.pos = c(0, 0.25, 0.5, 0.75, 1))
   kpAbline(baf_depth_plot, h=c(0.25, 0.5, 0.75), lty = 0.5, r0 =0.55, r1=1)
