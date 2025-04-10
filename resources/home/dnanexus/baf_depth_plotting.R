@@ -26,9 +26,11 @@ parser <- ArgumentParser()
 
 # specify our desired options 
 # by default ArgumentParser will add an help option 
+parser$add_argument("--infiles", type="character", default=NULL,
+    required=TRUE, help="Input files [list of tsv]")
 parser$add_argument("--min_baf", type="double", default=0.04,
     help="Minimum BAF threshold displayed [default %(default)s]")
-parser$add_argument("--max_baf", type="double", default=0.96
+parser$add_argument("--max_baf", type="double", default=0.96,
     help="Maximum BAF threshold displayed [default %(default)s]")
 parser$add_argument("--bin_size", type="integer", default=1000, 
     help="Bin size plot [default %(default)s]")
