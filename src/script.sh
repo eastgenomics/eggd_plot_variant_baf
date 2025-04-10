@@ -22,7 +22,7 @@ main() {
 
     bcftools query -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' $vcf_path -o "$vcf_prefix.vcf.tsv"
 
-    if ! Rscript baf_depth_plotting.R; then
+    if ! Rscript baf_depth_plotting.R --min_baf 0.04 --max_baf 0.94 --bin_size 1000 --max_depth_plot 750 --min_depth 50 ; then
     echo "Error: BAF plotting failed with exit code $?" >&2
     exit 1
     fi
