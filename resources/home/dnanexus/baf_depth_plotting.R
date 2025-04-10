@@ -39,7 +39,7 @@ parser$add_argument("--max_depth_plot", type="integer", default=750,
 parser$add_argument("--min_depth", type="integer", default=50,
     help="Minimum depth allowed [default %(default)s]")
 parser$add_argument("--chr_names", type="double", default=c(paste0(1:22), "X", "Y"),
-    help="Standard deviation if generator == \"rnorm\" [default %(default)s]")
+    help="Chromosome names [default %(default)s]")
                                         
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults, 
@@ -182,7 +182,7 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = M
 ####################
 
 # list bed files for plotting
-gvcf_files <- list.files(path = ".", pattern = ".tsv")
+gvcf_files <- infiles #list.files(path = ".", pattern = ".tsv")
 
 # read bed files into dfs for BAF plot
 df_list <- list()
