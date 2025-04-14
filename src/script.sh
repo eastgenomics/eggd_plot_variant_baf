@@ -42,6 +42,9 @@ main() {
     if [ -n "$chr_names" ]; then
         options+="--chr_names $chr_names "
     fi
+    if [ -n "$genome" ]; then
+        options+="--genome $genome "
+    fi
 
     # Run R script with error handling
     if ! Rscript baf_depth_plotting.R $options; then

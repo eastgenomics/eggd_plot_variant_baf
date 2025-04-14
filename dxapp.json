@@ -73,6 +73,13 @@
         "class": "string",
         "optional": true,
         "help": "Chromosome names used for axis labels"
+      },
+      {
+        "name": "genome",
+        "label": "Genome build",
+        "class": "string",
+        "optional": true,
+        "help": "Genome build for plotting (eg. hg19, hg38, mm10, etc.)"
       }
     ],
     "outputSpec": [

@@ -5,7 +5,6 @@
 #
 # Constraints
 ##################
-# The genome parameter in the plotkaryotype function defaults to hg19
 # Depth values that are higher than the max value in Y axis will be plotted in the BAF plot
 # Only .tsv files can be provided
 # Chromosome names need to be provided as it defaults to include "chr"
@@ -38,6 +37,8 @@ parser$add_argument("--min_depth", type="integer", default=50,
     help="Minimum depth allowed [default %(default)s]")
 parser$add_argument("--chr_names", type="character", default=c(paste0(1:22), "X", "Y"),
     help="Chromosome names [default %(default)s]")
+parser$add_argument("--genome", type="character", default="hg19",
+    help="Genome build for plotKaryotype function [default %(default)s]")
                                         
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults, 
@@ -61,6 +62,9 @@ CHR_NAMES <- args$chr_names
 
 # Minimum depth
 MIN_DEPTH <- args$min_depth
+
+# Genome build for plotKaryotype function
+GENOME <- args$genome
 
 
 # List of functions
@@ -143,18 +147,18 @@ get_snp_data_Depth <- function(df) {
 # @parameters min_baf and max_baf - integers : include only variants in range min_baf < BAF < max_baf
 # returns plot
 
-get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = MAX_DEPTH_PLOT, chr_names = CHR_NAMES, min_baf = MIN_BAF, max_baf = MAX_BAF) {
+get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = MAX_DEPTH_PLOT, chr_names = CHR_NAMES, min_baf = MIN_BAF, max_baf = MAX_BAF, genome_build = GENOME) {
   file_name_png <- paste0(sub(".tsv", "", file_name), ".png")
   png(file_name_png, width = 15, height = 5, units = "in", res = 600)
   plot_parameters <- getDefaultPlotParams(plot.type = 4)
   plot_parameters$data1inmargin <- 2
-  baf_depth_plot <- plotKaryotype(plot.type = 4, ideogram.plotter = NULL, plot.params = plot_parameters, labels.plotter = NULL)
+  baf_depth_plot <- plotKaryotype(genome = genome_build, plot.type = 4, ideogram.plotter = NULL, plot.params = plot_parameters, labels.plotter = NULL)
   kpAddChromosomeNames(baf_depth_plot, chr.names = chr_names)
   kpAddCytobandsAsLine(baf_depth_plot) # Add centromers
   # top graph
   baf_threshold <- which(snp.data.baf$BAF > min_baf & snp.data.baf$BAF < max_baf)
-  modified_high_depth <- snp.data.depth$mean_depth > 750 # get values above 750                     # does this need to be pinned to the MAX_DEPTH_PLOT?
-  snp.data.depth$mean_depth <- pmin(snp.data.depth$mean_depth, 750) # assign the max to 750
+  modified_high_depth <- snp.data.depth$mean_depth > max_depth_plot # get values above max_depth_plot
+  snp.data.depth$mean_depth <- pmin(snp.data.depth$mean_depth, max_depth_plot) # assign the max to max_depth_plot
   modified_depth <- ifelse(
     modified_high_depth, 'darkgreen',
     ifelse(snp.data.depth$mean_depth < MIN_DEPTH , "white",'darkblue')
