@@ -26,8 +26,6 @@ parser <- ArgumentParser()
 
 # specify our desired options 
 # by default ArgumentParser will add an help option 
-parser$add_argument("--infiles", type="character", default=NULL,
-    required=TRUE, help="Input files [list of tsv]")
 parser$add_argument("--min_baf", type="double", default=0.04,
     help="Minimum BAF threshold displayed [default %(default)s]")
 parser$add_argument("--max_baf", type="double", default=0.96,
@@ -38,7 +36,7 @@ parser$add_argument("--max_depth_plot", type="integer", default=750,
     help = "Max depth to be shown on plot [default %(default)s]")
 parser$add_argument("--min_depth", type="integer", default=50,
     help="Minimum depth allowed [default %(default)s]")
-parser$add_argument("--chr_names", type="double", default=c(paste0(1:22), "X", "Y"),
+parser$add_argument("--chr_names", type="character", default=c(paste0(1:22), "X", "Y"),
     help="Chromosome names [default %(default)s]")
                                         
 # get command line options, if help option encountered print help and exit,
@@ -49,20 +47,21 @@ args <- parser$parse_args()
 ##################
 
 # Minimum and maximum thresholds of BAFs to be plotted
-MIN_BAF <- args.min_baf
-MAX_BAF <- args.max_baf
+MIN_BAF <- args$min_baf
+MAX_BAF <- args$max_baf
 
 # Used to aggregate depth values for smoother visualization
-BIN_SIZE <- args.bin_size
+BIN_SIZE <- args$bin_size
 
 # Adjusts the Y-axis plot for mean_depth values
-MAX_DEPTH_PLOT <- args.max_depth_plot
+MAX_DEPTH_PLOT <- args$max_depth_plot
 
 # Chromosome labels to feature in the plot X-axis
-CHR_NAMES <- args.chr_names
+CHR_NAMES <- args$chr_names
 
 # Minimum depth
-MIN_DEPTH <- args.min_depth
+MIN_DEPTH <- args$min_depth
+
 
 # List of functions
 ##################################
@@ -182,7 +181,7 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = M
 ####################
 
 # list bed files for plotting
-gvcf_files <- infiles #list.files(path = ".", pattern = ".tsv")
+gvcf_files <- list.files(path = ".", pattern = ".tsv")
 
 # read bed files into dfs for BAF plot
 df_list <- list()

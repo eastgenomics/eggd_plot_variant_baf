@@ -33,20 +33,10 @@
         "help": "Tarball of compiled R packages"
       },
       {
-        "name": "infiles",
-        "label": "Input Files",
-        "class": "array:file",
-        "optional": false,
-        "patterns": [
-          "*.tsv$"
-        ],
-        "help": "TSV files with the following columns: sample, chrom, start, end, depth, baf"
-      },
-      {
         "name": "min_baf",
         "label": "Minimum BAF",
         "class": "string",
-        "optional": false,
+        "optional": true,
         "help": "Minimum BAF allowed"
       },
       {
@@ -60,7 +50,7 @@
         "name": "bin_size",
         "label": "Bin size",
         "class": "string",
-        "optional": false,
+        "optional": true,
         "help": "Bin size for plotting"
       },
       {
