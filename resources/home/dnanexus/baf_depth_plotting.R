@@ -104,7 +104,7 @@ read_to_df <- function(file) {
 # @parameter bin_size - integer: length of window for variant aggregation
 # returns df_binned
 
-bin_df <- function(df, bin_size = BIN_SIZE) {
+bin_df <- function(df, bin_size) {
   polars_df <- as_polars_df(df)
   rolling_df <- polars_df$rolling(
     index_column = "Position",
@@ -147,7 +147,7 @@ get_snp_data_Depth <- function(df) {
 # @parameters min_baf and max_baf - integers : include only variants in range min_baf < BAF < max_baf
 # returns plot
 
-get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = MAX_DEPTH_PLOT, chr_names = CHR_NAMES, min_baf = MIN_BAF, max_baf = MAX_BAF, genome_build = GENOME) {
+get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot, chr_names, min_baf, max_baf, genome_build) {
   file_name_png <- paste0(sub(".tsv", "", file_name), ".png")
   png(file_name_png, width = 15, height = 5, units = "in", res = 600)
   plot_parameters <- getDefaultPlotParams(plot.type = 4)
