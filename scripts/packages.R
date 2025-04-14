@@ -23,6 +23,7 @@ if (!requireNamespace("BiocManager", quietly = TRUE)) {
 # BiocManager installs the version of packages that was released in the specified bioconductor version (karyoploterR v1.28.0)
 BiocManager::install(
   "karyoploteR",
+  version = "3.18",
   lib = libPath
 )
 
