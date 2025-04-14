@@ -199,7 +199,7 @@ for (file in gvcf_files) {
 df_binned_list <- list()
 
 for (df in df_list) {
-  df_binned <- bin_df(df)
+  df_binned <- bin_df(df, BIN_SIZE)
   df_binned_list[[length(df_binned_list) + 1]] <- df_binned
 }
 
@@ -219,5 +219,5 @@ for (df in df_binned_list) {
 
 # generate plots and save them
 mapply(function(snp.data.baf, snp.data.depth, file_name) {
-  get_plot(snp.data.baf, snp.data.depth, file_name)
+  get_plot(snp.data.baf, snp.data.depth, file_name, MAX_DEPTH_PLOT, CHR_NAMES, MIN_BAF, MAX_BAF, GENOME)
 }, snp.data.baf_list, snp.data.depth_list, gvcf_files)
