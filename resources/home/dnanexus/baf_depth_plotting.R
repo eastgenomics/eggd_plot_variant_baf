@@ -95,6 +95,9 @@ read_to_df <- function(file) {
   # Avoid division by zero
   df$RAF <- ifelse(df$Depth > 0, as.numeric(df$Ref_AD) / df$Depth, NA)
   df$BAF <- ifelse(df$Depth > 0, as.numeric(df$Alt_DP) / df$Depth, NA)
+  # Add symmetrical BAF
+  df$symRAF <- as.numeric(1 - df$RAF)
+  df$symBAF <- as.numeric(1 - df$BAF)
 
   return(df)
 }
