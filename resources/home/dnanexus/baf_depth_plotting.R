@@ -95,8 +95,6 @@ read_to_df <- function(file) {
   # Avoid division by zero
   df$RAF <- ifelse(df$Depth > 0, as.numeric(df$Ref_AD) / df$Depth, NA)
   df$BAF <- ifelse(df$Depth > 0, as.numeric(df$Alt_DP) / df$Depth, NA)
-  # Add symmetrical BAF
-  df$symBAF <- as.numeric(1 - df$BAF)
 
   return(df)
 }
@@ -123,8 +121,8 @@ bin_df <- function(df, bin_size) {
 # returns snp.data for baf plot
 
 get_snp_data_BAF <- function(df) {
-  snp.data.baf <- toGRanges(df[, c("Chr", "Position", "Position", "Depth", "BAF", "symBAF")])
-  names(mcols(snp.data.baf)) <- c("Depth", "BAF", "symBAF")
+  snp.data.baf <- toGRanges(df[, c("Chr", "Position", "Position", "Depth", "BAF")])
+  names(mcols(snp.data.baf)) <- c("Depth", "BAF")
   seqlevelsStyle(snp.data.baf) <- "UCSC" # convert to "chr" to comply with USCS rules
 
   return(snp.data.baf)
@@ -158,7 +156,7 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot, ch
   kpAddChromosomeNames(baf_depth_plot, chr.names = chr_names)
   kpAddCytobandsAsLine(baf_depth_plot) # Add centromers
   # top graph
-  baf_threshold <- which(snp.data.baf$BAF > min_baf & snp.data.baf$BAF < max_baf & snp.data.baf$symBAF > min_baf & snp.data.baf$symBAF < max_baf)
+  baf_threshold <- which(snp.data.baf$BAF > min_baf & snp.data.baf$BAF < max_baf)
   modified_high_depth <- snp.data.depth$mean_depth > max_depth_plot # get values above max_depth_plot
   snp.data.depth$mean_depth <- pmin(snp.data.depth$mean_depth, max_depth_plot) # assign the max to max_depth_plot
   modified_depth <- ifelse(
