@@ -2,7 +2,14 @@
     "name": "eggd_plot_variant_baf",
     "title": "eggd_plot_variant_baf",
     "summary": "Plot BAF and Depth with Karyoploter",
-    "version": "1.0.0",
+    "version": "2.0.0",
+    "changeLog": [
+        {
+            "version": "2.0.0",
+            "date": "2025-10-01",
+            "description": "Make app more flexible (remove hardcoded inputs). Improve plotting symmetry."
+        }
+    ],
     "inputSpec":
     [
       {
@@ -24,6 +31,55 @@
           "*.tar.gz$"
         ],
         "help": "Tarball of compiled R packages"
+      },
+      {
+        "name": "min_baf",
+        "label": "Minimum BAF",
+        "class": "string",
+        "optional": true,
+        "help": "Minimum BAF allowed"
+      },
+      {
+        "name": "max_baf",
+        "label": "Maximum BAF",
+        "class": "string",
+        "optional": true,
+        "help": "Maximum BAF allowed"
+      },
+      {
+        "name": "bin_size",
+        "label": "Bin size",
+        "class": "string",
+        "optional": true,
+        "help": "Bin size for plotting"
+      },
+      {
+        "name": "max_depth_plot",
+        "label": "Maximum depth",
+        "class": "string",
+        "optional": true,
+        "help": "Maximum depth for y-axis"
+      },
+      {
+        "name": "min_depth",
+        "label": "Minimum depth",
+        "class": "string",
+        "optional": true,
+        "help": "Minimum depth for plotting"
+      },
+      {
+        "name": "chr_names",
+        "label": "Chromosome names",
+        "class": "string",
+        "optional": true,
+        "help": "Chromosome names used for axis labels"
+      },
+      {
+        "name": "genome",
+        "label": "Genome build",
+        "class": "string",
+        "optional": true,
+        "help": "Genome build for plotting (eg. hg19, hg38, mm10, etc.)"
       }
     ],
     "outputSpec": [

@@ -9,6 +9,8 @@ if (!dir.exists(libPath)) {
 # Install CRAN packages with explicit versions
 install.packages("stringr", version = "1.5.1", lib = libPath, repos = "https://cloud.r-project.org")
 install.packages("dplyr", version = "1.1.4", lib = libPath, repos = "https://cloud.r-project.org")
+install.packages("argparse", version = "2.2.5", lib = libPath, repos = "https://cloud.r-project.org")
+
 
 # Install BiocManager if missing
 if (!requireNamespace("BiocManager", quietly = TRUE)) {

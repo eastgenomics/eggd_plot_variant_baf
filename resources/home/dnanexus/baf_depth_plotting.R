@@ -5,26 +5,9 @@
 #
 # Constraints
 ##################
-# The genome parameter in the plotkaryotype function defaults to hg19
 # Depth values that are higher than the max value in Y axis will be plotted in the BAF plot
 # Only .tsv files can be provided
 # Chromosome names need to be provided as it defaults to include "chr"
-
-# Configurables
-##################
-
-# Minimum and maximum thresholds of BAFs to be plotted
-MIN_BAF <- 0.04
-MAX_BAF <- 0.96
-
-# Used to aggregate depth values for smoother visualization
-BIN_SIZE <- 1000
-
-# Adjusts the Y-axis plot for mean_depth values
-MAX_DEPTH_PLOT <- 750
-
-# Chromosome labels to feature in the plot X-axis
-CHR_NAMES <- c(paste0(1:22), "X", "Y")
 
 # Load required modules
 ##################################
@@ -32,6 +15,57 @@ library(stringr, quietly = TRUE)
 library(karyoploteR, quietly = TRUE)
 library(dplyr, quietly = TRUE)
 library(polars, quietly = TRUE)
+library(argparse, quietly = TRUE)
+
+# Get configurable inputs via command line
+####################################################
+
+# create parser object
+parser <- ArgumentParser()
+
+# specify our desired options 
+# by default ArgumentParser will add an help option 
+parser$add_argument("--min_baf", type="double", default=0.04,
+    help="Minimum BAF threshold displayed [default %(default)s]")
+parser$add_argument("--max_baf", type="double", default=0.96,
+    help="Maximum BAF threshold displayed [default %(default)s]")
+parser$add_argument("--bin_size", type="integer", default=1000, 
+    help="Bin size plot [default %(default)s]")
+parser$add_argument("--max_depth_plot", type="integer", default=750, 
+    help = "Max depth to be shown on plot [default %(default)s]")
+parser$add_argument("--min_depth", type="integer", default=50,
+    help="Minimum depth allowed [default %(default)s]")
+parser$add_argument("--chr_names", type="character", default=c(paste0(1:22), "X", "Y"),
+    help="Chromosome names [default %(default)s]")
+parser$add_argument("--genome", type="character", default="hg19",
+    help="Genome build for plotKaryotype function [default %(default)s]")
+                                        
+# get command line options, if help option encountered print help and exit,
+# otherwise if options not found on command line then set defaults, 
+args <- parser$parse_args()
+
+# Configurables
+##################
+
+# Minimum and maximum thresholds of BAFs to be plotted
+MIN_BAF <- args$min_baf
+MAX_BAF <- args$max_baf
+
+# Used to aggregate depth values for smoother visualization
+BIN_SIZE <- args$bin_size
+
+# Adjusts the Y-axis plot for mean_depth values
+MAX_DEPTH_PLOT <- args$max_depth_plot
+
+# Chromosome labels to feature in the plot X-axis
+CHR_NAMES <- args$chr_names
+
+# Minimum depth
+MIN_DEPTH <- args$min_depth
+
+# Genome build for plotKaryotype function
+GENOME <- args$genome
+
 
 # List of functions
 ##################################
@@ -70,7 +104,7 @@ read_to_df <- function(file) {
 # @parameter bin_size - integer: length of window for variant aggregation
 # returns df_binned
 
-bin_df <- function(df, bin_size = BIN_SIZE) {
+bin_df <- function(df, bin_size) {
   polars_df <- as_polars_df(df)
   rolling_df <- polars_df$rolling(
     index_column = "Position",
@@ -113,21 +147,21 @@ get_snp_data_Depth <- function(df) {
 # @parameters min_baf and max_baf - integers : include only variants in range min_baf < BAF < max_baf
 # returns plot
 
-get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot = MAX_DEPTH_PLOT, chr_names = CHR_NAMES, min_baf = MIN_BAF, max_baf = MAX_BAF) {
+get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot, chr_names, min_baf, max_baf, genome_build) {
   file_name_png <- paste0(sub(".tsv", "", file_name), ".png")
   png(file_name_png, width = 15, height = 5, units = "in", res = 600)
   plot_parameters <- getDefaultPlotParams(plot.type = 4)
   plot_parameters$data1inmargin <- 2
-  baf_depth_plot <- plotKaryotype(plot.type = 4, ideogram.plotter = NULL, plot.params = plot_parameters, labels.plotter = NULL)
+  baf_depth_plot <- plotKaryotype(genome = genome_build, plot.type = 4, ideogram.plotter = NULL, plot.params = plot_parameters, labels.plotter = NULL)
   kpAddChromosomeNames(baf_depth_plot, chr.names = chr_names)
   kpAddCytobandsAsLine(baf_depth_plot) # Add centromers
   # top graph
   baf_threshold <- which(snp.data.baf$BAF > min_baf & snp.data.baf$BAF < max_baf)
-  modified_high_depth <- snp.data.depth$mean_depth > 750 # get values above 750
-  snp.data.depth$mean_depth <- pmin(snp.data.depth$mean_depth, 750) # assign the max to 750
+  modified_high_depth <- snp.data.depth$mean_depth > max_depth_plot # get values above max_depth_plot
+  snp.data.depth$mean_depth <- pmin(snp.data.depth$mean_depth, max_depth_plot) # assign the max to max_depth_plot
   modified_depth <- ifelse(
     modified_high_depth, 'darkgreen',
-    ifelse(snp.data.depth$mean_depth < 50 , "white",'darkblue')
+    ifelse(snp.data.depth$mean_depth < MIN_DEPTH , "white",'darkblue')
   ) # Assign colors based on the mean_depth
   kpAxis(baf_depth_plot, r0 = 0.55, r1 = 1, tick.pos = c(0, 0.25, 0.5, 0.75, 1))
   kpAbline(baf_depth_plot, h=c(0.25, 0.5, 0.75), lty = 0.5, r0 =0.55, r1=1)
@@ -165,7 +199,7 @@ for (file in gvcf_files) {
 df_binned_list <- list()
 
 for (df in df_list) {
-  df_binned <- bin_df(df)
+  df_binned <- bin_df(df, BIN_SIZE)
   df_binned_list[[length(df_binned_list) + 1]] <- df_binned
 }
 
@@ -185,5 +219,5 @@ for (df in df_binned_list) {
 
 # generate plots and save them
 mapply(function(snp.data.baf, snp.data.depth, file_name) {
-  get_plot(snp.data.baf, snp.data.depth, file_name)
+  get_plot(snp.data.baf, snp.data.depth, file_name, MAX_DEPTH_PLOT, CHR_NAMES, MIN_BAF, MAX_BAF, GENOME)
 }, snp.data.baf_list, snp.data.depth_list, gvcf_files)

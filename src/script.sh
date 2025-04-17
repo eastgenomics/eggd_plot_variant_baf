@@ -22,11 +22,37 @@ main() {
 
     bcftools query -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' $vcf_path -o "$vcf_prefix.vcf.tsv"
 
-    if ! Rscript baf_depth_plotting.R; then
+    # construct optional argument string
+    options=""
+    if [ -n "$min_baf" ]; then
+        options+="--min_baf $min_baf "
+    fi
+    if [ -n "$max_baf" ]; then
+        options+="--max_baf $max_baf "
+    fi
+    if [ -n "$bin_size" ]; then
+        options+="--bin_size $bin_size "
+    fi
+    if [ -n "$max_depth_plot" ]; then
+        options+="--max_depth_plot $max_depth_plot "
+    fi
+    if [ -n "$min_depth" ]; then
+        options+="--min_depth $min_depth "
+    fi
+    if [ -n "$chr_names" ]; then
+        options+="--chr_names $chr_names "
+    fi
+    if [ -n "$genome" ]; then
+        options+="--genome $genome "
+    fi
+
+    # Run R script with error handling
+    if ! Rscript baf_depth_plotting.R $options; then
     echo "Error: BAF plotting failed with exit code $?" >&2
     exit 1
     fi
     
+    # Deal with output
     mkdir -p out/baf_plot
     mv *.png out/baf_plot
 
