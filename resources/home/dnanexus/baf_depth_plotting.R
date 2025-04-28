@@ -96,6 +96,9 @@ read_to_df <- function(file) {
   df$RAF <- ifelse(df$Depth > 0, as.numeric(df$Ref_AD) / df$Depth, NA)
   df$BAF <- ifelse(df$Depth > 0, as.numeric(df$Alt_DP) / df$Depth, NA)
 
+  # Filter out low depth rows
+  df <- df[df$Depth >= MIN_DEPTH, ]
+
   return(df)
 }
 
