@@ -80,6 +80,14 @@
         "class": "string",
         "optional": true,
         "help": "Genome build for plotting (eg. hg19, hg38, mm10, etc.). Default is hg19"
+      },
+      {
+        "name": "symmetry",
+        "label": "Symmetrical BAF plot",
+        "class": "boolean",
+        "default": true,
+        "optional": true,
+        "help": "Whether to plot symmetrical points on the BAF plot. Default is True."
       }
     ],
     "outputSpec": [

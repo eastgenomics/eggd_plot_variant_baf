@@ -39,6 +39,8 @@ parser$add_argument("--chr_names", type="character", default=c(paste0(1:22), "X"
     help="Chromosome names [default %(default)s]")
 parser$add_argument("--genome", type="character", default="hg19",
     help="Genome build for plotKaryotype function [default %(default)s]")
+parser$add_argument("--symmetry", type="logical", default=TRUE,
+    help="Whether to plot BAF symmetrically [default %(default)s]")
                                         
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults, 
@@ -66,6 +68,9 @@ MIN_DEPTH <- args$min_depth
 # Genome build for plotKaryotype function
 GENOME <- args$genome
 
+# Option to make BAF plot symmetrical
+SYMMETRY <- args$symmetry
+
 
 # List of functions
 ##################################
@@ -89,15 +94,22 @@ read_to_df <- function(file) {
   }
 
   # calculate BAF
-  df[c("Ref_AD", "Alt_DP")] <- str_split_fixed(df$Allele_Depth, ",", 2)
+  df[c("Ref_AD", "Alt_AD")] <- str_split_fixed(df$Allele_Depth, ",", 2)
   df$RAF <- as.numeric(df$Ref_AD)
-  df$BAF <- as.numeric(df$Alt_DP)
+  df$BAF <- as.numeric(df$Alt_AD)
   # Avoid division by zero
   df$RAF <- ifelse(df$Depth > 0, as.numeric(df$Ref_AD) / df$Depth, NA)
-  df$BAF <- ifelse(df$Depth > 0, as.numeric(df$Alt_DP) / df$Depth, NA)
+  df$BAF <- ifelse(df$Depth > 0, as.numeric(df$Alt_AD) / df$Depth, NA)
 
   # Filter out low depth rows
   df <- df[df$Depth >= MIN_DEPTH, ]
+
+  # Add symmetrical values if required
+  if (SYMMETRY) {
+    symmetric_df <- df
+    symmetric_df$BAF <- 1 - df$BAF
+    df <- rbind(df, symmetric_df)
+  }
 
   return(df)
 }
@@ -108,7 +120,9 @@ read_to_df <- function(file) {
 # returns df_binned
 
 bin_df <- function(df, bin_size) {
-  polars_df <- as_polars_df(df)
+  head(df)
+  polars_df <- as_polars_df(df[order(df$Chr, df$Position), ])
+  head(polars_df)
   rolling_df <- polars_df$rolling(
     index_column = "Position",
     group_by = "Chr",
@@ -157,7 +171,7 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot, ch
   plot_parameters$data1inmargin <- 2
   baf_depth_plot <- plotKaryotype(genome = genome_build, plot.type = 4, ideogram.plotter = NULL, plot.params = plot_parameters, labels.plotter = NULL)
   kpAddChromosomeNames(baf_depth_plot, chr.names = chr_names)
-  kpAddCytobandsAsLine(baf_depth_plot) # Add centromers
+  kpAddCytobandsAsLine(baf_depth_plot) # Add centromeres
   # top graph
   baf_threshold <- which(snp.data.baf$BAF > min_baf & snp.data.baf$BAF < max_baf)
   modified_high_depth <- snp.data.depth$mean_depth > max_depth_plot # get values above max_depth_plot
