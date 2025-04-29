@@ -35,35 +35,35 @@
       {
         "name": "min_baf",
         "label": "Minimum BAF",
-        "class": "string",
+        "class": "float",
         "optional": true,
         "help": "Minimum BAF for BAF plot. Default is 0.04"
       },
       {
         "name": "max_baf",
         "label": "Maximum BAF",
-        "class": "string",
+        "class": "float",
         "optional": true,
         "help": "Maximum BAF for BAF plot. Default is 0.96"
       },
       {
         "name": "bin_size",
         "label": "Bin size",
-        "class": "string",
+        "class": "int",
         "optional": true,
         "help": "Bin size for plotting depth. Default is 1000"
       },
       {
         "name": "max_depth_plot",
         "label": "Maximum depth",
-        "class": "string",
+        "class": "int",
         "optional": true,
         "help": "Maximum depth for y-axis. Default is 750"
       },
       {
         "name": "min_depth",
         "label": "Minimum depth",
-        "class": "string",
+        "class": "int",
         "optional": true,
         "help": "Minimum depth for plotting. Default is 50"
       },
@@ -79,7 +79,7 @@
         "label": "Genome build",
         "class": "string",
         "optional": true,
-        "help": "Genome build for plotting (eg. hg19, hg38, mm10, etc.). Default is hg19"
+        "help": "Genome build for plotting (eg. hg19, hg38). Default is hg19"
       },
       {
         "name": "symmetry",

@@ -69,7 +69,7 @@ MIN_DEPTH <- args$min_depth
 GENOME <- args$genome
 
 # Option to make BAF plot symmetrical
-SYMMETRY <- args$symmetry
+SYMMETRY <- toupper(args$symmetry)
 
 
 # List of functions
