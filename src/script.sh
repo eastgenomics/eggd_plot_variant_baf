@@ -60,7 +60,7 @@ main() {
     mkdir -p out/baf_plot
     mv *.png out/baf_plot
 
-    if [ $output_tsv ]; then
+    if [ "$output_tsv" = true ]; then
         mkdir -p out/tsv
         mv baf_df_*.tsv out/tsv
     fi
