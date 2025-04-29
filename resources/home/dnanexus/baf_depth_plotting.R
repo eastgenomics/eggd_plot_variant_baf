@@ -72,6 +72,7 @@ GENOME <- args$genome
 SYMMETRY <- toupper(args$symmetry)
 
 
+
 # List of functions
 ##################################
 
@@ -106,6 +107,7 @@ read_to_df <- function(file) {
 
   # Add symmetrical values if required
   if (SYMMETRY) {
+    print("symmetry enabled")
     symmetric_df <- df
     symmetric_df$BAF <- 1 - df$BAF
     df <- rbind(df, symmetric_df)
@@ -120,9 +122,7 @@ read_to_df <- function(file) {
 # returns df_binned
 
 bin_df <- function(df, bin_size) {
-  head(df)
   polars_df <- as_polars_df(df[order(df$Chr, df$Position), ])
-  head(polars_df)
   rolling_df <- polars_df$rolling(
     index_column = "Position",
     group_by = "Chr",
@@ -210,6 +210,12 @@ df_list <- list()
 for (file in gvcf_files) {
   df_trimmed <- read_to_df(file)
   df_list[[length(df_list) + 1]] <- df_trimmed
+}
+
+# make tsvs for testing if needed
+for (idx in 1:length(df_list)) {
+  file_name <- paste0("baf_df_", idx, ".tsv")
+  write.table(df_list[idx], file=file_name, quote=FALSE, sep='\t', col.names = NA)
 }
 
 # read bed files into binned dfs for depth plot

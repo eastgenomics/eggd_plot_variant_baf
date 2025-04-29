@@ -36,6 +36,7 @@
         "name": "min_baf",
         "label": "Minimum BAF",
         "class": "float",
+        "default": 0.04,
         "optional": true,
         "help": "Minimum BAF for BAF plot. Default is 0.04"
       },
@@ -43,6 +44,7 @@
         "name": "max_baf",
         "label": "Maximum BAF",
         "class": "float",
+        "default": 0.96,
         "optional": true,
         "help": "Maximum BAF for BAF plot. Default is 0.96"
       },
@@ -50,6 +52,7 @@
         "name": "bin_size",
         "label": "Bin size",
         "class": "int",
+        "default": 1000,
         "optional": true,
         "help": "Bin size for plotting depth. Default is 1000"
       },
@@ -57,6 +60,7 @@
         "name": "max_depth_plot",
         "label": "Maximum depth",
         "class": "int",
+        "default": 750,
         "optional": true,
         "help": "Maximum depth for y-axis. Default is 750"
       },
@@ -64,6 +68,7 @@
         "name": "min_depth",
         "label": "Minimum depth",
         "class": "int",
+        "default": 50,
         "optional": true,
         "help": "Minimum depth for plotting. Default is 50"
       },
@@ -71,6 +76,7 @@
         "name": "chr_names",
         "label": "Chromosome names",
         "class": "string",
+        "default": "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y",
         "optional": true,
         "help": "Chromosome names used for axis labels"
       },
@@ -78,6 +84,7 @@
         "name": "genome",
         "label": "Genome build",
         "class": "string",
+        "default": "hg19",
         "optional": true,
         "help": "Genome build for plotting (eg. hg19, hg38). Default is hg19"
       },
@@ -88,6 +95,14 @@
         "default": true,
         "optional": true,
         "help": "Whether to plot symmetrical points on the BAF plot. Default is True."
+      },
+      {
+        "name": "output_tsv",
+        "label": "Output TSV",
+        "class": "boolean",
+        "default": false,
+        "optional": true,
+        "help": "Whether to output a TSV file of the BAF dataframe for testing purposes. Default is False."
       }
     ],
     "outputSpec": [
@@ -97,6 +112,13 @@
         "help": "",
         "class": "file",
         "patterns": ["*.png"]
+      },
+      {
+        "name": "tsv",
+        "label": "TSV of BAF dataframe",
+        "help": "",
+        "class": "file",
+        "patterns": ["*.tsv"]
       }
     ],
     "runSpec": {
