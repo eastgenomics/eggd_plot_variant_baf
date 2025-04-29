@@ -107,7 +107,6 @@ read_to_df <- function(file) {
 
   # Add symmetrical values if required
   if (SYMMETRY) {
-    print("symmetry enabled")
     symmetric_df <- df
     symmetric_df$BAF <- 1 - df$BAF
     df <- rbind(df, symmetric_df)
