@@ -118,6 +118,7 @@
         "label": "TSV of BAF dataframe",
         "help": "",
         "class": "file",
+        "optional": true,
         "patterns": ["*.tsv"]
       }
     ],

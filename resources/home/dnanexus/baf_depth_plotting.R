@@ -214,7 +214,7 @@ for (file in gvcf_files) {
 # make tsvs for testing if needed
 for (idx in 1:length(df_list)) {
   file_name <- paste0("baf_df_", idx, ".tsv")
-  write.table(df_list[idx], file=file_name, quote=FALSE, sep='\t', col.names = NA)
+  write.table(df_list[[idx]], file=file_name, quote=FALSE, sep='\t', col.names = NA)
 }
 
 # read bed files into binned dfs for depth plot
