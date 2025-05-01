@@ -45,6 +45,10 @@ main() {
     if [ -n "$genome" ]; then
         options+="--genome $genome "
     fi
+    if [ -n "$symmetry" ]; then
+        options+="--symmetry $symmetry "
+    fi
+
 
     # Run R script with error handling
     if ! Rscript baf_depth_plotting.R $options; then
@@ -55,6 +59,11 @@ main() {
     # Deal with output
     mkdir -p out/baf_plot
     mv *.png out/baf_plot
+
+    if [ "$output_tsv" = true ]; then
+        mkdir -p out/tsv
+        mv *.baf.tsv out/tsv
+    fi
 
     dx-upload-all-outputs
 
