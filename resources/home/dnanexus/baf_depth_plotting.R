@@ -35,7 +35,7 @@ parser$add_argument("--max_depth_plot", type="integer", default=750,
     help = "Max depth to be shown on plot [default %(default)s]")
 parser$add_argument("--min_depth", type="integer", default=50,
     help="Minimum depth allowed [default %(default)s]")
-parser$add_argument("--chr_names", type="character", default=c(paste0(1:22), "X", "Y"),
+parser$add_argument("--chr_names", type="character", default="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y",
     help="Chromosome names [default %(default)s]")
 parser$add_argument("--genome", type="character", default="hg19",
     help="Genome build for plotKaryotype function [default %(default)s]")
@@ -60,7 +60,7 @@ BIN_SIZE <- args$bin_size
 MAX_DEPTH_PLOT <- args$max_depth_plot
 
 # Chromosome labels to feature in the plot X-axis
-CHR_NAMES <- args$chr_names
+CHR_NAMES <- strsplit(args$chr_names, ",")[[1]]
 
 # Minimum depth
 MIN_DEPTH <- args$min_depth
@@ -70,7 +70,6 @@ GENOME <- args$genome
 
 # Option to make BAF plot symmetrical
 SYMMETRY <- toupper(args$symmetry)
-
 
 
 # List of functions
@@ -212,10 +211,10 @@ for (file in gvcf_files) {
 }
 
 # make tsvs for testing if needed
-for (idx in 1:length(df_list)) {
-  file_name <- paste0("baf_df_", idx, ".tsv")
-  write.table(df_list[[idx]], file=file_name, quote=FALSE, sep='\t', col.names = NA)
-}
+mapply(function(df, file_name) {
+  base <- tools::file_path_sans_ext(tools::file_path_sans_ext(basename(file_name)))
+  write.table(df, file=paste0(base, ".baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
+}, df_list, gvcf_files)
 
 # read bed files into binned dfs for depth plot
 df_binned_list <- list()

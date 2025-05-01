@@ -119,7 +119,7 @@
         "help": "",
         "class": "file",
         "optional": true,
-        "patterns": ["*.tsv"]
+        "patterns": ["*.baf.tsv"]
       }
     ],
     "runSpec": {

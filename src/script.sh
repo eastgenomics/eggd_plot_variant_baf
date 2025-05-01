@@ -62,7 +62,7 @@ main() {
 
     if [ "$output_tsv" = true ]; then
         mkdir -p out/tsv
-        mv baf_df_*.tsv out/tsv
+        mv *.baf.tsv out/tsv
     fi
 
     dx-upload-all-outputs
