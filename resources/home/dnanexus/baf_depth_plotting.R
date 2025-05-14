@@ -174,7 +174,7 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
   snp.data.depth$mean_depth <- pmin(snp.data.depth$mean_depth, max_depth) # assign the max to max_depth
   modified_depth <- ifelse(
     modified_high_depth, 'darkgreen',
-    ifelse(snp.data.depth$mean_depth < MIN_DEPTH, "yellow",'darkblue')
+    ifelse(snp.data.depth$mean_depth < MIN_DEPTH, "blue",'darkblue')
   ) # Assign colors based on the mean_depth
   kpAxis(baf_depth_plot, r0 = 0.55, r1 = 1, tick.pos = c(0, 0.25, 0.5, 0.75, 1))
   kpAbline(baf_depth_plot, h=c(0.25, 0.5, 0.75), lty = 0.5, r0 =0.55, r1=1)
