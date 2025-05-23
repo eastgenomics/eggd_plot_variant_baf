@@ -35,6 +35,8 @@ parser$add_argument("--max_depth", type="double", default=0.9,
     help = "Max depth to be shown on plot [default %(default)s]")
 parser$add_argument("--min_depth", type="integer", default=5,
     help="Minimum depth allowed [default %(default)s]")
+parser$add_argument("--bin_size", type="integer", optional=TRUE,
+    help="Bin size for reducing noise in depth plot")
 parser$add_argument("--chr_names", type="character", default="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y",
     help="Chromosome names [default %(default)s]")
 parser$add_argument("--genome", type="character", default="hg19",
@@ -43,8 +45,13 @@ parser$add_argument("--symmetry", type="logical", default=TRUE,
     help="Whether to plot BAF symmetrically [default %(default)s]")
                                         
 # get command line options, if help option encountered print help and exit,
-# otherwise if options not found on command line then set defaults, 
+# otherwise if options not found on command line then set defaults,
 args <- parser$parse_args()
+
+# Validate percentile parameter  
+if (args$max_depth < 0 || args$max_depth > 1) {
+  stop("max_depth must be a percentile value between 0 and 1")
+}
 
 # Configurables
 ##################
@@ -210,7 +217,10 @@ base <- tools::file_path_sans_ext(tools::file_path_sans_ext(basename(VCF_FILE)))
 write.table(df_filtered, file=paste0(base, ".baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
 
 # dynamic bin size choice
-BIN_SIZE <- ifelse(length(df_filtered$Depth)/3000 >= 1, round(length(df_filtered$Depth)/3000), 1)
+BIN_SIZE <- ifelse(
+  exists("BIN_SIZE"), BIN_SIZE,
+  ifelse(length(df_filtered$Depth)/2000 >= 1, round(length(df_filtered$Depth)/2000), 1)
+)
 
 # read bed file into binned df for depth plot
 df_binned <- bin_df(df_trimmed, BIN_SIZE)

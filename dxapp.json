@@ -65,6 +65,13 @@
         "help": "Minimum depth for plotting. Default is 5"
       },
       {
+        "name": "bin_size",
+        "label": "Bin size",
+        "class": "int",
+        "optional": true,
+        "help": "Bin size to use for plotting depth (reduces noise). By default, scale down by a factor of 3000."
+      },
+      {
         "name": "chr_names",
         "label": "Chromosome names",
         "class": "string",

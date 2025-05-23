@@ -36,6 +36,9 @@ main() {
     if [ -n "$min_depth" ]; then
         options+="--min_depth $min_depth "
     fi
+    if [ -n "$bin_size" ]; then
+        options+="--bin_size $bin_size "
+    fi
     if [ -n "$chr_names" ]; then
         options+="--chr_names $chr_names "
     fi
