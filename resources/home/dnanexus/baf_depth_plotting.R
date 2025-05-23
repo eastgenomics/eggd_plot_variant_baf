@@ -33,7 +33,7 @@ parser$add_argument("--max_baf", type="double", default=0.96,
     help="Maximum BAF threshold displayed [default %(default)s]")
 parser$add_argument("--max_depth", type="double", default=0.9, 
     help = "Max depth to be shown on plot [default %(default)s]")
-parser$add_argument("--min_depth", type="double", default=0.1,
+parser$add_argument("--min_depth", type="integer", default=5,
     help="Minimum depth allowed [default %(default)s]")
 parser$add_argument("--chr_names", type="character", default="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y",
     help="Chromosome names [default %(default)s]")
@@ -173,8 +173,7 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
   modified_high_depth <- snp.data.depth$mean_depth > max_depth # get values above max_depth
   snp.data.depth$mean_depth <- pmin(snp.data.depth$mean_depth, max_depth) # assign the max to max_depth
   modified_depth <- ifelse(
-    modified_high_depth, 'darkgreen',
-    ifelse(snp.data.depth$mean_depth < MIN_DEPTH, "blue",'darkblue')
+    modified_high_depth, 'darkgreen', 'darkblue'
   ) # Assign colors based on the mean_depth
   kpAxis(baf_depth_plot, r0 = 0.55, r1 = 1, tick.pos = c(0, 0.25, 0.5, 0.75, 1))
   kpAbline(baf_depth_plot, h=c(0.25, 0.5, 0.75), lty = 0.5, r0 =0.55, r1=1)
@@ -201,7 +200,6 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
 df_trimmed <- read_to_df(VCF_FILE)
 
 # get quantiles for plotting limits
-MIN_DEPTH <- quantile(df_trimmed$Depth, probs = MIN_DEPTH, names = FALSE)
 MAX_DEPTH <- quantile(df_trimmed$Depth, probs = MAX_DEPTH, names = FALSE)
 
 # Filter out low depth rows

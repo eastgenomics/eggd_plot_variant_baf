@@ -59,10 +59,10 @@
       {
         "name": "min_depth",
         "label": "Minimum depth",
-        "class": "float",
-        "default": 0.1,
+        "class": "int",
+        "default": 5,
         "optional": true,
-        "help": "Minimum depth (percentile) for plotting. Default is 0.1 (10%)"
+        "help": "Minimum depth for plotting. Default is 5"
       },
       {
         "name": "chr_names",
