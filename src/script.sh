@@ -30,14 +30,14 @@ main() {
     if [ -n "$max_baf" ]; then
         options+="--max_baf $max_baf "
     fi
-    if [ -n "$bin_size" ]; then
-        options+="--bin_size $bin_size "
-    fi
-    if [ -n "$max_depth_plot" ]; then
-        options+="--max_depth_plot $max_depth_plot "
+    if [ -n "$max_depth" ]; then
+        options+="--max_depth $max_depth "
     fi
     if [ -n "$min_depth" ]; then
         options+="--min_depth $min_depth "
+    fi
+    if [ -n "$bin_size" ]; then
+        options+="--bin_size $bin_size "
     fi
     if [ -n "$chr_names" ]; then
         options+="--chr_names $chr_names "
@@ -51,7 +51,7 @@ main() {
 
 
     # Run R script with error handling
-    if ! Rscript baf_depth_plotting.R $options; then
+    if ! Rscript baf_depth_plotting.R --vcf "$vcf_prefix.vcf.tsv" $options; then
     echo "Error: BAF plotting failed with exit code $?" >&2
     exit 1
     fi

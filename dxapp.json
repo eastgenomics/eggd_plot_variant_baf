@@ -49,28 +49,27 @@
         "help": "Maximum BAF for BAF plot. Default is 0.96"
       },
       {
-        "name": "bin_size",
-        "label": "Bin size",
-        "class": "int",
-        "default": 1000,
-        "optional": true,
-        "help": "Bin size for plotting depth. Default is 1000"
-      },
-      {
-        "name": "max_depth_plot",
+        "name": "max_depth",
         "label": "Maximum depth",
-        "class": "int",
-        "default": 750,
+        "class": "float",
+        "default": 0.9,
         "optional": true,
-        "help": "Maximum depth for y-axis. Default is 750"
+        "help": "Maximum depth (percentile) for plotting. Default is 0.9 (90%)"
       },
       {
         "name": "min_depth",
         "label": "Minimum depth",
         "class": "int",
-        "default": 50,
+        "default": 5,
         "optional": true,
-        "help": "Minimum depth for plotting. Default is 50"
+        "help": "Minimum depth for plotting. Default is 5"
+      },
+      {
+        "name": "bin_size",
+        "label": "Bin size",
+        "class": "int",
+        "optional": true,
+        "help": "Bin size to use for plotting depth (reduces noise). By default, scale down by a factor of 3000."
       },
       {
         "name": "chr_names",

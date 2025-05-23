@@ -25,16 +25,18 @@ parser <- ArgumentParser()
 
 # specify our desired options 
 # by default ArgumentParser will add an help option 
+parser$add_argument("--vcf", type="character", default="*.vcf.tsv",
+    help="Input VCF-derived file in tsv format [default %(default)s]")
 parser$add_argument("--min_baf", type="double", default=0.04,
     help="Minimum BAF threshold displayed [default %(default)s]")
 parser$add_argument("--max_baf", type="double", default=0.96,
     help="Maximum BAF threshold displayed [default %(default)s]")
-parser$add_argument("--bin_size", type="integer", default=1000, 
-    help="Bin size plot [default %(default)s]")
-parser$add_argument("--max_depth_plot", type="integer", default=750, 
+parser$add_argument("--max_depth", type="double", default=0.9, 
     help = "Max depth to be shown on plot [default %(default)s]")
-parser$add_argument("--min_depth", type="integer", default=50,
+parser$add_argument("--min_depth", type="integer", default=5,
     help="Minimum depth allowed [default %(default)s]")
+parser$add_argument("--bin_size", type="integer", optional=TRUE,
+    help="Bin size for reducing noise in depth plot")
 parser$add_argument("--chr_names", type="character", default="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y",
     help="Chromosome names [default %(default)s]")
 parser$add_argument("--genome", type="character", default="hg19",
@@ -43,21 +45,26 @@ parser$add_argument("--symmetry", type="logical", default=TRUE,
     help="Whether to plot BAF symmetrically [default %(default)s]")
                                         
 # get command line options, if help option encountered print help and exit,
-# otherwise if options not found on command line then set defaults, 
+# otherwise if options not found on command line then set defaults,
 args <- parser$parse_args()
+
+# Validate percentile parameter  
+if (args$max_depth < 0 || args$max_depth > 1) {
+  stop("max_depth must be a percentile value between 0 and 1")
+}
 
 # Configurables
 ##################
+
+# Input file name
+VCF_FILE <- args$vcf
 
 # Minimum and maximum thresholds of BAFs to be plotted
 MIN_BAF <- args$min_baf
 MAX_BAF <- args$max_baf
 
-# Used to aggregate depth values for smoother visualization
-BIN_SIZE <- args$bin_size
-
 # Adjusts the Y-axis plot for mean_depth values
-MAX_DEPTH_PLOT <- args$max_depth_plot
+MAX_DEPTH <- args$max_depth
 
 # Chromosome labels to feature in the plot X-axis
 CHR_NAMES <- strsplit(args$chr_names, ",")[[1]]
@@ -101,9 +108,6 @@ read_to_df <- function(file) {
   df$RAF <- ifelse(df$Depth > 0, as.numeric(df$Ref_AD) / df$Depth, NA)
   df$BAF <- ifelse(df$Depth > 0, as.numeric(df$Alt_AD) / df$Depth, NA)
 
-  # Filter out low depth rows
-  df <- df[df$Depth >= MIN_DEPTH, ]
-
   # Add symmetrical values if required
   if (SYMMETRY) {
     symmetric_df <- df
@@ -131,6 +135,7 @@ bin_df <- function(df, bin_size) {
   return(df_binned)
 }
 
+
 # Function to create snp.data.baf format as input to karyoploteR plot BAF
 # @parameter df
 # returns snp.data for baf plot
@@ -157,12 +162,12 @@ get_snp_data_Depth <- function(df) {
 
 # Function to create a karyoploteR plot of BAF vs binned Depth
 # @parameters snp.data.baf, snp.data.depth, file_name
-# @parameter max_depth_plot - integer : maximum depth value for y-axis in plots
+# @parameter max_depth - integer : maximum depth value for y-axis in plots
 # @parameter chr_names - vector with chromosomes to be listed
 # @parameters min_baf and max_baf - integers : include only variants in range min_baf < BAF < max_baf
 # returns plot
 
-get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot, chr_names, min_baf, max_baf, genome_build) {
+get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_names, min_baf, max_baf, genome_build) {
   file_name_png <- paste0(sub(".tsv", "", file_name), ".png")
   png(file_name_png, width = 15, height = 5, units = "in", res = 600)
   plot_parameters <- getDefaultPlotParams(plot.type = 4)
@@ -171,12 +176,11 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot, ch
   kpAddChromosomeNames(baf_depth_plot, chr.names = chr_names)
   kpAddCytobandsAsLine(baf_depth_plot) # Add centromeres
   # top graph
-  baf_threshold <- which(snp.data.baf$BAF > min_baf & snp.data.baf$BAF < max_baf)
-  modified_high_depth <- snp.data.depth$mean_depth > max_depth_plot # get values above max_depth_plot
-  snp.data.depth$mean_depth <- pmin(snp.data.depth$mean_depth, max_depth_plot) # assign the max to max_depth_plot
+  baf_threshold <- which(snp.data.baf$BAF > min_baf & snp.data.baf$BAF <= max_baf)
+  modified_high_depth <- snp.data.depth$mean_depth > max_depth # get values above max_depth
+  snp.data.depth$mean_depth <- pmin(snp.data.depth$mean_depth, max_depth) # assign the max to max_depth
   modified_depth <- ifelse(
-    modified_high_depth, 'darkgreen',
-    ifelse(snp.data.depth$mean_depth < MIN_DEPTH , "white",'darkblue')
+    modified_high_depth, 'darkgreen', 'darkblue'
   ) # Assign colors based on the mean_depth
   kpAxis(baf_depth_plot, r0 = 0.55, r1 = 1, tick.pos = c(0, 0.25, 0.5, 0.75, 1))
   kpAbline(baf_depth_plot, h=c(0.25, 0.5, 0.75), lty = 0.5, r0 =0.55, r1=1)
@@ -185,10 +189,10 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot, ch
     cex = 0.5, r0 = 0.55, r1 = 1, col = "darkorange2"
   )
   # bottom graph
-  kpAxis(baf_depth_plot, r0 = 0, r1 = 0.45, ymax = max_depth_plot, ymin = 0)
+  kpAxis(baf_depth_plot, r0 = 0, r1 = 0.45, ymax = max_depth, ymin = 0)
   kpPoints(baf_depth_plot,
     data = snp.data.depth, y = snp.data.depth$mean_depth,
-    cex = 0.5, r0 = 0, r1 = 0.45, ymax = max_depth_plot, ymin = 0, col = modified_depth
+    cex = 0.5, r0 = 0, r1 = 0.45, ymax = max_depth, ymin = 0, col = modified_depth
   )
   kpAddMainTitle(baf_depth_plot, main = "BAF vs Depth")
   kpAddChromosomeSeparators(baf_depth_plot, col = "darkgray", lty = 3, data.panel = "all")
@@ -199,46 +203,34 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth_plot, ch
 # call functions
 ####################
 
-# list bed files for plotting
-gvcf_files <- list.files(path = ".", pattern = ".tsv")
+# read tsv file into df for BAF plot
+df_trimmed <- read_to_df(VCF_FILE)
 
-# read bed files into dfs for BAF plot
-df_list <- list()
+# get quantiles for plotting limits
+MAX_DEPTH <- quantile(df_trimmed$Depth, probs = MAX_DEPTH, names = FALSE)
 
-for (file in gvcf_files) {
-  df_trimmed <- read_to_df(file)
-  df_list[[length(df_list) + 1]] <- df_trimmed
-}
+# Filter out low depth rows
+df_filtered <- df_trimmed[df_trimmed$Depth >= MIN_DEPTH, ]
 
 # make tsvs for testing if needed
-mapply(function(df, file_name) {
-  base <- tools::file_path_sans_ext(tools::file_path_sans_ext(basename(file_name)))
-  write.table(df, file=paste0(base, ".baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
-}, df_list, gvcf_files)
+base <- tools::file_path_sans_ext(tools::file_path_sans_ext(basename(VCF_FILE)))
+write.table(df_filtered, file=paste0(base, ".baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
 
-# read bed files into binned dfs for depth plot
-df_binned_list <- list()
+# dynamic bin size choice
+BIN_SIZE <- ifelse(
+  exists("BIN_SIZE"), BIN_SIZE,
+  ifelse(length(df_filtered$Depth)/2000 >= 1, round(length(df_filtered$Depth)/2000), 1)
+)
 
-for (df in df_list) {
-  df_binned <- bin_df(df, BIN_SIZE)
-  df_binned_list[[length(df_binned_list) + 1]] <- df_binned
-}
+# read bed file into binned df for depth plot
+df_binned <- bin_df(df_trimmed, BIN_SIZE)
 
 # convert dfs for baf plotting into snp.data for karyoploter
-snp.data.baf_list <- list()
-for (df in df_list) {
-  snp.data.baf <- get_snp_data_BAF(df)
-  snp.data.baf_list[[length(snp.data.baf_list) + 1]] <- snp.data.baf
-}
+snp.data.baf <- get_snp_data_BAF(df_filtered)
 
 # convert dfs for depth plotting into snp.data for karyoploter
-snp.data.depth_list <- list()
-for (df in df_binned_list) {
-  snp.data.depth <- get_snp_data_Depth(df)
-  snp.data.depth_list[[length(snp.data.depth_list) + 1]] <- snp.data.depth
-}
+snp.data.depth <- get_snp_data_Depth(df_binned)
 
 # generate plots and save them
-mapply(function(snp.data.baf, snp.data.depth, file_name) {
-  get_plot(snp.data.baf, snp.data.depth, file_name, MAX_DEPTH_PLOT, CHR_NAMES, MIN_BAF, MAX_BAF, GENOME)
-}, snp.data.baf_list, snp.data.depth_list, gvcf_files)
+get_plot(snp.data.baf, snp.data.depth, VCF_FILE, MAX_DEPTH, CHR_NAMES, MIN_BAF, MAX_BAF, GENOME)
+
