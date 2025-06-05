@@ -126,7 +126,7 @@
         "name": "tsv",
         "label": "TSVs of BAF dataframes",
         "help": "",
-        "class": "array",
+        "class": "array:file",
         "optional": true,
         "patterns": ["*.baf.tsv"]
       }
