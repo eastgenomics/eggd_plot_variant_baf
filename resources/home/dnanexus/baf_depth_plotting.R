@@ -227,18 +227,20 @@ MAX_DEPTH <- round(quantile(df_gvcf$Depth, probs = MAX_DEPTH_PCT, names = FALSE)
 # Filter out low depth rows
 df_filtered <- df_vcf[df_vcf$Depth >= MIN_DEPTH, ]
 
-# make tsvs for testing if needed
-base <- tools::file_path_sans_ext(tools::file_path_sans_ext(basename(VCF_FILE)))
-write.table(df_filtered, file=paste0(base, ".baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
-
 # dynamic bin size choice
 BIN_SIZE <- ifelse(
   exists("BIN_SIZE"), BIN_SIZE,
   ifelse(length(df_gvcf$Depth)/2000 >= 1, round(length(df_gvcf$Depth)/2000), 1)
 )
 
-# read bed file into binned df for depth plot
+# aggregate gvcf df into binned df for depth plot
 df_binned <- bin_df(df_gvcf, BIN_SIZE)
+
+# make tsvs for testing if needed
+write.table(df_vcf, file=paste0(SAMPLE_NAME, ".vcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
+write.table(df_filtered, file=paste0(SAMPLE_NAME, ".filtered.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
+write.table(df_gvcf, file=paste0(SAMPLE_NAME, ".gvcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
+write.table(df_binned, file=paste0(SAMPLE_NAME, ".binned.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
 
 # convert dfs for baf plotting into snp.data for karyoploter
 snp.data.baf <- get_snp_data_BAF(df_filtered)

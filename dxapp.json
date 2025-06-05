@@ -28,7 +28,7 @@
         "class": "file",
         "optional": false,
         "patterns": [
-          "*.sgenome.vcf$", "*.genome.vcf.gz$"
+          "*.genome.vcf$", "*.genome.vcf.gz$", "*.gvcf$", "*.gvcf.gz$"
         ],
         "help": "GVCF"
       },
@@ -124,9 +124,9 @@
       },
       {
         "name": "tsv",
-        "label": "TSV of BAF dataframe",
+        "label": "TSVs of BAF dataframes",
         "help": "",
-        "class": "file",
+        "class": "array",
         "optional": true,
         "patterns": ["*.baf.tsv"]
       }
