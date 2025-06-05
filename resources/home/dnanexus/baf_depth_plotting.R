@@ -73,7 +73,7 @@ MIN_BAF <- args$min_baf
 MAX_BAF <- args$max_baf
 
 # Adjusts the Y-axis plot for mean_depth values
-MAX_DEPTH <- args$max_depth
+MAX_DEPTH_PCT <- args$max_depth
 
 # Chromosome labels to feature in the plot X-axis
 CHR_NAMES <- strsplit(args$chr_names, ",")[[1]]
@@ -201,12 +201,12 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
     cex = 0.5, r0 = 0.55, r1 = 1, col = "darkorange2"
   )
   # bottom graph
-  kpAxis(baf_depth_plot, r0 = 0, r1 = 0.45, ymax = max_depth, ymin = 0, tick.pos = c(0, 0.25, 0.5, 0.75, max_depth))
+  kpAxis(baf_depth_plot, r0 = 0, r1 = 0.45, ymax = max_depth, ymin = 0)
   kpPoints(baf_depth_plot,
     data = snp.data.depth, y = snp.data.depth$mean_depth,
     cex = 0.5, r0 = 0, r1 = 0.45, ymax = max_depth, ymin = 0, col = modified_depth
   )
-  kpAddMainTitle(baf_depth_plot, main = paste0(SAMPLE_NAME, " BAF vs Depth. Low DP filter (upper plot) = ", MIN_DEPTH, ". Max DP cut-off (lower plot) = ", MAX_DEPTH))
+  kpAddMainTitle(baf_depth_plot, main = paste0("BAF vs Depth.    Low DP filter (upper plot) = ", MIN_DEPTH, ". Max DP cut-off percentile (lower plot) = ", MAX_DEPTH_PCT*100, "%"))
   kpAddChromosomeSeparators(baf_depth_plot, col = "darkgray", lty = 3, data.panel = "all")
 
   dev.off()
@@ -222,7 +222,7 @@ df_vcf <- read_to_df(VCF_FILE)
 df_gvcf <- read_to_df(GVCF_FILE)
 
 # get quantiles for plotting limits
-MAX_DEPTH <- quantile(df_vcf$Depth, probs = MAX_DEPTH, names = FALSE)
+MAX_DEPTH <- round(quantile(df_gvcf$Depth, probs = MAX_DEPTH_PCT, names = FALSE), digits = 0)
 
 # Filter out low depth rows
 df_filtered <- df_vcf[df_vcf$Depth >= MIN_DEPTH, ]
