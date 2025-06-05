@@ -27,6 +27,8 @@ parser <- ArgumentParser()
 # by default ArgumentParser will add an help option 
 parser$add_argument("--vcf", type="character", default="*.vcf.tsv",
     help="Input VCF-derived file in tsv format [default %(default)s]")
+parser$add_argument("--gvcf", type="character", default="*.gvcf.tsv",
+    help="Input GVCF-derived file in tsv format [default %(default)s]")
 parser$add_argument("--min_baf", type="double", default=0.04,
     help="Minimum BAF threshold displayed [default %(default)s]")
 parser$add_argument("--max_baf", type="double", default=0.96,
@@ -35,7 +37,7 @@ parser$add_argument("--max_depth", type="double", default=0.9,
     help = "Max depth to be shown on plot [default %(default)s]")
 parser$add_argument("--min_depth", type="integer", default=5,
     help="Minimum depth allowed [default %(default)s]")
-parser$add_argument("--bin_size", type="integer", optional=TRUE,
+parser$add_argument("--bin_size", type="integer",
     help="Bin size for reducing noise in depth plot")
 parser$add_argument("--chr_names", type="character", default="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y",
     help="Chromosome names [default %(default)s]")
@@ -56,8 +58,9 @@ if (args$max_depth < 0 || args$max_depth > 1) {
 # Configurables
 ##################
 
-# Input file name
+# Input file names
 VCF_FILE <- args$vcf
+GVCF_FILE <- args$gvcf
 
 # Minimum and maximum thresholds of BAFs to be plotted
 MIN_BAF <- args$min_baf
@@ -71,6 +74,9 @@ CHR_NAMES <- strsplit(args$chr_names, ",")[[1]]
 
 # Minimum depth
 MIN_DEPTH <- args$min_depth
+
+# Bin size for depth plot
+BIN_SIZE <- args$bin_size
 
 # Genome build for plotKaryotype function
 GENOME <- args$genome
@@ -204,13 +210,16 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
 ####################
 
 # read tsv file into df for BAF plot
-df_trimmed <- read_to_df(VCF_FILE)
+df_vcf <- read_to_df(VCF_FILE)
+
+# read tsv file into df for DEPTH plot
+df_gvcf <- read_to_df(GVCF_FILE)
 
 # get quantiles for plotting limits
-MAX_DEPTH <- quantile(df_trimmed$Depth, probs = MAX_DEPTH, names = FALSE)
+MAX_DEPTH <- quantile(df_vcf$Depth, probs = MAX_DEPTH, names = FALSE)
 
 # Filter out low depth rows
-df_filtered <- df_trimmed[df_trimmed$Depth >= MIN_DEPTH, ]
+df_filtered <- df_vcf[df_vcf$Depth >= MIN_DEPTH, ]
 
 # make tsvs for testing if needed
 base <- tools::file_path_sans_ext(tools::file_path_sans_ext(basename(VCF_FILE)))
@@ -219,11 +228,11 @@ write.table(df_filtered, file=paste0(base, ".baf.tsv"), quote=FALSE, sep='\t', c
 # dynamic bin size choice
 BIN_SIZE <- ifelse(
   exists("BIN_SIZE"), BIN_SIZE,
-  ifelse(length(df_filtered$Depth)/2000 >= 1, round(length(df_filtered$Depth)/2000), 1)
+  ifelse(length(df_gvcf$Depth)/2000 >= 1, round(length(df_gvcf$Depth)/2000), 1)
 )
 
 # read bed file into binned df for depth plot
-df_binned <- bin_df(df_trimmed, BIN_SIZE)
+df_binned <- bin_df(df_gvcf, BIN_SIZE)
 
 # convert dfs for baf plotting into snp.data for karyoploter
 snp.data.baf <- get_snp_data_BAF(df_filtered)

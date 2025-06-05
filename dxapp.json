@@ -20,7 +20,17 @@
         "patterns": [
           "*.vcf$", "*.vcf.gz$"
         ],
-        "help": "VCF"
+        "help": "Filtered VCF from VEP"
+      },
+      {
+        "name": "gvcf",
+        "label": "GVCF",
+        "class": "file",
+        "optional": false,
+        "patterns": [
+          "*.sgenome.vcf$", "*.genome.vcf.gz$"
+        ],
+        "help": "GVCF"
       },
       {
         "name": "packages",
