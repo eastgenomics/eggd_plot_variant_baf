@@ -52,7 +52,7 @@ main() {
 
 
     # Run R script with error handling
-    if ! Rscript baf_depth_plotting.R --vcf "$vcf_prefix.vcf.tsv" "$gvcf_prefix.gvcf.tsv" $options; then
+    if ! Rscript baf_depth_plotting.R --vcf "$vcf_prefix.vcf.tsv" --gvcf "$gvcf_prefix.gvcf.tsv" $options; then
     echo "Error: BAF plotting failed with exit code $?" >&2
     exit 1
     fi
