@@ -55,6 +55,12 @@ if (args$max_depth < 0 || args$max_depth > 1) {
   stop("max_depth must be a percentile value between 0 and 1")
 }
 
+# get sample name & check they're the same for the two inputs
+SAMPLE_NAME <- str_split_1(sub("\\.vcf\\.tsv$", "", basename(args$vcf)), "_")[1]
+if (SAMPLE_NAME != str_split_1(sub("\\.gvcf\\.tsv$", "", basename(args$gvcf)), "_")[1]) {
+  stop("Sample names in VCF and GVCF files do not match")
+}
+
 # Configurables
 ##################
 
@@ -174,7 +180,7 @@ get_snp_data_Depth <- function(df) {
 # returns plot
 
 get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_names, min_baf, max_baf, genome_build) {
-  file_name_png <- paste0(sub(".tsv", "", file_name), ".png")
+  file_name_png <- paste0(SAMPLE_NAME, ".baf.png")
   png(file_name_png, width = 15, height = 5, units = "in", res = 600)
   plot_parameters <- getDefaultPlotParams(plot.type = 4)
   plot_parameters$data1inmargin <- 2
@@ -195,12 +201,12 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
     cex = 0.5, r0 = 0.55, r1 = 1, col = "darkorange2"
   )
   # bottom graph
-  kpAxis(baf_depth_plot, r0 = 0, r1 = 0.45, ymax = max_depth, ymin = 0)
+  kpAxis(baf_depth_plot, r0 = 0, r1 = 0.45, ymax = max_depth, ymin = 0, tick.pos = c(0, 0.25, 0.5, 0.75, max_depth))
   kpPoints(baf_depth_plot,
     data = snp.data.depth, y = snp.data.depth$mean_depth,
     cex = 0.5, r0 = 0, r1 = 0.45, ymax = max_depth, ymin = 0, col = modified_depth
   )
-  kpAddMainTitle(baf_depth_plot, main = "BAF vs Depth")
+  kpAddMainTitle(baf_depth_plot, main = paste0(SAMPLE_NAME, " BAF vs Depth. Low DP filter (upper plot) = ", MIN_DEPTH, ". Max DP cut-off (lower plot) = ", MAX_DEPTH))
   kpAddChromosomeSeparators(baf_depth_plot, col = "darkgray", lty = 3, data.panel = "all")
 
   dev.off()
@@ -241,5 +247,5 @@ snp.data.baf <- get_snp_data_BAF(df_filtered)
 snp.data.depth <- get_snp_data_Depth(df_binned)
 
 # generate plots and save them
-get_plot(snp.data.baf, snp.data.depth, VCF_FILE, MAX_DEPTH, CHR_NAMES, MIN_BAF, MAX_BAF, GENOME)
+get_plot(snp.data.baf, snp.data.depth, SAMPLE_NAME, MAX_DEPTH, CHR_NAMES, MIN_BAF, MAX_BAF, GENOME)
 
