@@ -21,6 +21,7 @@ main() {
     echo "R_LIBS_USER=~/R/library" >> ~/.Renviron
 
     bcftools query -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' $vcf_path -o "$vcf_prefix.vcf.tsv"
+    bcftools query -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' $gvcf_path -o "$gvcf_prefix.gvcf.tsv"
 
     # construct optional argument string
     options=""
@@ -51,7 +52,7 @@ main() {
 
 
     # Run R script with error handling
-    if ! Rscript baf_depth_plotting.R --vcf "$vcf_prefix.vcf.tsv" $options; then
+    if ! Rscript baf_depth_plotting.R --vcf "$vcf_prefix.vcf.tsv" --gvcf "$gvcf_prefix.gvcf.tsv" $options; then
     echo "Error: BAF plotting failed with exit code $?" >&2
     exit 1
     fi

@@ -20,7 +20,17 @@
         "patterns": [
           "*.vcf$", "*.vcf.gz$"
         ],
-        "help": "VCF"
+        "help": "Filtered VCF from VEP"
+      },
+      {
+        "name": "gvcf",
+        "label": "GVCF",
+        "class": "file",
+        "optional": false,
+        "patterns": [
+          "*.genome.vcf$", "*.genome.vcf.gz$", "*.gvcf$", "*.gvcf.gz$"
+        ],
+        "help": "GVCF"
       },
       {
         "name": "packages",
@@ -114,9 +124,9 @@
       },
       {
         "name": "tsv",
-        "label": "TSV of BAF dataframe",
+        "label": "TSVs of BAF dataframes",
         "help": "",
-        "class": "file",
+        "class": "array:file",
         "optional": true,
         "patterns": ["*.baf.tsv"]
       }
@@ -131,7 +141,7 @@
       "file": "src/script.sh",
       "systemRequirements": {
         "*": {
-          "instanceType": "mem1_ssd2_v2_x4"
+          "instanceType": "mem3_ssd1_v2_x4"
         }
       },
       "assetDepends": [

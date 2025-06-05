@@ -1,13 +1,14 @@
 # eggd_plot_variant_baf
 
 ## What does this app do?
-Plots BAF and depth of variants from given VCF
+Plots BAF and depth of variants from given VCF/GVCF pair.
 
 
 ## What data are required for this app to run?
 **Required input files:**
-1. A VCF file (`.vcf`) - containing the merged small variants we want to plot.
-2. R packages (`.tar.gz`) - compressed tarball of R packages needed to generate plot.
+1. A VCF file (`.vcf`) - containing the VEP filtered variants for the BAF plot.
+2. A GVCF file (`.gvcf`) - containing the merged small variants for the depth plot.
+3. R packages (`.tar.gz`) - compressed tarball of R packages needed to generate plot.
 <br>
 
 **R Packages and Versions:**
@@ -16,6 +17,7 @@ Plots BAF and depth of variants from given VCF
 - `dplyr` (v1.1.4)
 - `karyoploteR` (v1.28.0)
 - `polars` (v0.22.0)
+- `argparse` (v2.2.5)
 
 **How to build the package**
 The package was built on Ubuntu 24.04 and R v4.3. Below are the steps:
@@ -42,11 +44,15 @@ This app outputs:
 ```
 dx run eggd_plot_variant_baf \
 -ivcf=file-xxxx \
+-igvcf=file-xxxx \
+-imax_depth=0.98 \
+-imin_depth=20 \
+-imin_baf=0 \
+-imax_baf=1
+-ibin_size=500
 -ipackages=file-xxxx  \
 --destination="output/eggd_plot_variant_baf"
 ```
 
 ## Notes
-The current version of the plotting has the following constraints:
-- plotting of variant depth is currently hard limited at DP<50, has a upper Y axis limit of 750 and plots the mean depth across 1000 consecutive variants
-- plotting of the BAF is hard limited at < 0.04 and > 0.96
+The current version must provide a value to the `bin_size` option as automatic scaling is not yet functional.
