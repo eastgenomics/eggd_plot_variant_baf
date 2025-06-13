@@ -25,30 +25,14 @@ main() {
 
     # construct optional argument string
     options=""
-    if [ -n "$min_baf" ]; then
-        options+="--min_baf $min_baf "
-    fi
-    if [ -n "$max_baf" ]; then
-        options+="--max_baf $max_baf "
-    fi
-    if [ -n "$max_depth" ]; then
-        options+="--max_depth $max_depth "
-    fi
-    if [ -n "$min_depth" ]; then
-        options+="--min_depth $min_depth "
-    fi
-    if [ -n "$bin_size" ]; then
-        options+="--bin_size $bin_size "
-    fi
-    if [ -n "$chr_names" ]; then
-        options+="--chr_names $chr_names "
-    fi
-    if [ -n "$genome" ]; then
-        options+="--genome $genome "
-    fi
-    if [ -n "$symmetry" ]; then
-        options+="--symmetry $symmetry "
-    fi
+    options+="--min_baf $min_baf "
+    options+="--max_baf $max_baf "
+    options+="--max_depth $max_depth "
+    options+="--min_depth $min_depth "
+    options+="--bin_size $bin_size "
+    options+="--chr_names $chr_names "
+    options+="--genome $genome "
+    options+="--symmetry $symmetry "
 
 
     # Run R script with error handling

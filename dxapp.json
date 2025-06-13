@@ -78,8 +78,9 @@
         "name": "bin_size",
         "label": "Bin size",
         "class": "int",
+        "default": 500,
         "optional": true,
-        "help": "Bin size to use for plotting depth (reduces noise). By default, scale down by a factor of 3000."
+        "help": "Bin size to use for plotting depth (reduces noise). Default = 500."
       },
       {
         "name": "chr_names",
