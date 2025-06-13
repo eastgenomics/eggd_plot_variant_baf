@@ -192,7 +192,7 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
   modified_high_depth <- snp.data.depth$mean_depth > max_depth # get values above max_depth
   snp.data.depth$mean_depth <- pmin(snp.data.depth$mean_depth, max_depth) # assign the max to max_depth
   modified_depth <- ifelse(
-    modified_high_depth, 'darkgreen', 'darkblue'
+    modified_high_depth, 'magenta', 'darkblue'
   ) # Assign colors based on the mean_depth
   kpAxis(baf_depth_plot, r0 = 0.55, r1 = 1, tick.pos = c(0, 0.25, 0.5, 0.75, 1))
   kpAbline(baf_depth_plot, h=c(0.25, 0.5, 0.75), lty = 0.5, r0 =0.55, r1=1)
@@ -206,6 +206,16 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
     data = snp.data.depth, y = snp.data.depth$mean_depth,
     cex = 0.5, r0 = 0, r1 = 0.45, ymax = max_depth, ymin = 0, col = modified_depth
   )
+  # add horizontal line at mean depth for each chromosome
+  df <- data.frame(x = snp.data.depth)
+  mean_depths <- tapply(df$x.mean_depth, df$x.seqnames, median, na.rm = TRUE)
+  for (chr in unique(df$x.seqnames)) {
+    mean_depth <- mean_depths[chr]
+    prop <- mean_depth / max_depth * 0.45 # scale to the bottom plot
+    if (!is.na(mean_depth)) {
+      kpAbline(baf_depth_plot, h=prop, chr=chr, col = "darkred", lwd = 3)
+    }
+  }
   kpAddMainTitle(baf_depth_plot, main = paste0("BAF vs Depth.    Low DP filter (upper plot) = ", MIN_DEPTH, ". Max DP cut-off percentile (lower plot) = ", MAX_DEPTH_PCT*100, "%"))
   kpAddChromosomeSeparators(baf_depth_plot, col = "darkgray", lty = 3, data.panel = "all")
 
