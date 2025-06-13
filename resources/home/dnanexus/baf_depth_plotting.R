@@ -211,9 +211,9 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
   mean_depths <- tapply(df$x.mean_depth, df$x.seqnames, median, na.rm = TRUE)
   for (chr in unique(df$x.seqnames)) {
     mean_depth <- mean_depths[chr]
-    prop <- mean_depth / max_depth * 0.45 # scale to the bottom plot
+    prop <- mean_depth / max_depth # scale to the bottom plot
     if (!is.na(mean_depth)) {
-      kpAbline(baf_depth_plot, h=prop, chr=chr, col = "darkred", lwd = 3)
+      kpAbline(baf_depth_plot, h=prop, chr=chr, col = "darkred", lwd = 3, r0 = 0, r1 = 0.45)
     }
   }
   kpAddMainTitle(baf_depth_plot, main = paste0("BAF vs Depth.    Low DP filter (upper plot) = ", MIN_DEPTH, ". Max DP cut-off percentile (lower plot) = ", MAX_DEPTH_PCT*100, "%"))
