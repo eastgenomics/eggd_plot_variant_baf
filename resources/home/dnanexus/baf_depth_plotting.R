@@ -206,13 +206,13 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
     data = snp.data.depth, y = snp.data.depth$mean_depth,
     cex = 0.5, r0 = 0, r1 = 0.45, ymax = max_depth, ymin = 0, col = modified_depth
   )
-  # add horizontal line at mean depth for each chromosome
+  # add horizontal line at median depth for each chromosome
   df <- data.frame(x = snp.data.depth)
-  mean_depths <- tapply(df$x.mean_depth, df$x.seqnames, median, na.rm = TRUE)
+  median_depths <- tapply(df$x.mean_depth, df$x.seqnames, median, na.rm = TRUE)
   for (chr in unique(df$x.seqnames)) {
-    mean_depth <- mean_depths[chr]
-    prop <- mean_depth / max_depth # scale to the bottom plot
-    if (!is.na(mean_depth)) {
+    median_depth <- median_depths[chr]
+    prop <- median_depth / max_depth # scale to the bottom plot
+    if (!is.na(median_depth)) {
       kpAbline(baf_depth_plot, h=prop, chr=chr, col = "darkred", lwd = 3, r0 = 0, r1 = 0.45)
     }
   }
