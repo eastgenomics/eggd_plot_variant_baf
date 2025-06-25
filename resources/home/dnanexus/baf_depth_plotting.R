@@ -226,7 +226,7 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
 ####################
 
 # read tsv file into df for BAF plot
-df_vcf <- read_to_df(VCF_FILE, TRUE)
+df_vcf <- read_to_df(VCF_FILE, SYMMETRY)
 
 # read tsv file into df for DEPTH plot
 df_gvcf <- read_to_df(GVCF_FILE, FALSE)
