@@ -98,7 +98,7 @@ SYMMETRY <- toupper(args$symmetry)
 # @parameter file
 # returns df
 
-read_to_df <- function(file) {
+read_to_df <- function(file, sym) {
   if (!file.exists(file)) {
     stop("File not found: ", file)
   }
@@ -121,7 +121,7 @@ read_to_df <- function(file) {
   df$BAF <- ifelse(df$Depth > 0, as.numeric(df$Alt_AD) / df$Depth, NA)
 
   # Add symmetrical values if required
-  if (SYMMETRY) {
+  if (sym == TRUE) {
     symmetric_df <- df
     symmetric_df$BAF <- 1 - df$BAF
     df <- rbind(df, symmetric_df)
@@ -226,10 +226,10 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
 ####################
 
 # read tsv file into df for BAF plot
-df_vcf <- read_to_df(VCF_FILE)
+df_vcf <- read_to_df(VCF_FILE, TRUE)
 
 # read tsv file into df for DEPTH plot
-df_gvcf <- read_to_df(GVCF_FILE)
+df_gvcf <- read_to_df(GVCF_FILE, FALSE)
 
 # get quantiles for plotting limits
 MAX_DEPTH <- round(quantile(df_gvcf$Depth, probs = MAX_DEPTH_PCT, names = FALSE), digits = 0)
