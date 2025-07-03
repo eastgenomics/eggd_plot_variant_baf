@@ -49,10 +49,6 @@ dx run eggd_plot_variant_baf \
 -imin_depth=20 \
 -imin_baf=0 \
 -imax_baf=1
--ibin_size=500
 -ipackages=file-xxxx  \
 --destination="output/eggd_plot_variant_baf"
 ```
-
-## Notes
-The current version must provide a value to the `bin_size` option as automatic scaling is not yet functional.
