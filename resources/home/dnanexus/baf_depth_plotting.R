@@ -211,6 +211,10 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
       data = snp.data.baf[baf_threshold], y = snp.data.baf[baf_threshold]$BAF,
       cex = 0.5, r0 = 0.55, r1 = 1, col = "darkorange2"
     )
+    title = paste0("BAF vs Depth for ", SAMPLE_NAME)
+  }
+  else {
+    title = paste0("Provided VCFs contain insufficient data for plotting - ", SAMPLE_NAME)
   }
   # bottom graph
   kpAxis(baf_depth_plot, r0 = 0, r1 = 0.45, ymax = max_depth, ymin = 0)
@@ -228,7 +232,7 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
       kpAbline(baf_depth_plot, h=prop, chr=chr, col = "darkred", lwd = 3, r0 = 0, r1 = 0.45)
     }
   }
-  kpAddMainTitle(baf_depth_plot, main = paste0("BAF vs Depth.    Low DP filter (upper plot) = ", MIN_DEPTH, ". Max DP cut-off percentile (lower plot) = ", MAX_DEPTH_PCT*100, "%"))
+  kpAddMainTitle(baf_depth_plot, main = title)
   kpAddChromosomeSeparators(baf_depth_plot, col = "darkgray", lty = 3, data.panel = "all")
 
   dev.off()
@@ -251,7 +255,6 @@ df_filtered <- df_vcf[df_vcf$Depth >= MIN_DEPTH, ]
 if (nrow(df_filtered) == 0) {
   print("No rows with Depth >= MIN_DEPTH found. Returning original df_vcf.")
   df_filtered <- df_vcf
-  MIN_DEPTH <- 0 # set to 0 for plot title
 }
 
 # dynamic bin size choice
