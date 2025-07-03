@@ -2,12 +2,17 @@
     "name": "eggd_plot_variant_baf",
     "title": "eggd_plot_variant_baf",
     "summary": "Plot BAF and Depth with Karyoploter",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "changeLog": [
         {
             "version": "2.0.0",
             "date": "2025-04-15",
             "description": "Make app more flexible (remove hardcoded inputs). Improve plotting symmetry."
+        },
+        {
+            "version": "2.0.1",
+            "date": "2025-07-03",
+            "description": "Stop app failing when vcf is empty (plot empty axis instead)."
         }
     ],
     "inputSpec":

@@ -102,7 +102,16 @@ read_to_df <- function(file, sym) {
   if (!file.exists(file)) {
     stop("File not found: ", file)
   }
-  df <- read.table(file = file, header = FALSE)
+  # check file is not empty
+  if (file.info(file)$size == 0) {
+    # make an empty dataframe
+    print(paste("File", file, "is empty. Returning an empty dataframe"))
+    empty_df <- data.frame(Chr = character(0), Position = numeric(0), Depth = numeric(0), BAF = numeric(0))
+    return(empty_df)
+  }
+  else {
+    df <- read.table(file = file, header = FALSE)
+  }
   if (ncol(df) != 4) {
     stop("Invalid TSV format: Expected 4 columns (CHROM, POS, DP, AD)")
   }
@@ -196,10 +205,17 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
   ) # Assign colors based on the mean_depth
   kpAxis(baf_depth_plot, r0 = 0.55, r1 = 1, tick.pos = c(0, 0.25, 0.5, 0.75, 1))
   kpAbline(baf_depth_plot, h=c(0.25, 0.5, 0.75), lty = 0.5, r0 =0.55, r1=1)
-  kpPoints(baf_depth_plot,
-    data = snp.data.baf[baf_threshold], y = snp.data.baf[baf_threshold]$BAF,
-    cex = 0.5, r0 = 0.55, r1 = 1, col = "darkorange2"
-  )
+  # only add points if snp.data.baf is not empty
+  if (length(snp.data.baf) > 0) {
+    kpPoints(baf_depth_plot,
+      data = snp.data.baf[baf_threshold], y = snp.data.baf[baf_threshold]$BAF,
+      cex = 0.5, r0 = 0.55, r1 = 1, col = "darkorange2"
+    )
+    title = paste0("BAF vs Depth for ", SAMPLE_NAME)
+  }
+  else {
+    title = paste0("Provided VCFs contain insufficient data for plotting - ", SAMPLE_NAME)
+  }
   # bottom graph
   kpAxis(baf_depth_plot, r0 = 0, r1 = 0.45, ymax = max_depth, ymin = 0)
   kpPoints(baf_depth_plot,
@@ -216,7 +232,7 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
       kpAbline(baf_depth_plot, h=prop, chr=chr, col = "darkred", lwd = 3, r0 = 0, r1 = 0.45)
     }
   }
-  kpAddMainTitle(baf_depth_plot, main = paste0("BAF vs Depth.    Low DP filter (upper plot) = ", MIN_DEPTH, ". Max DP cut-off percentile (lower plot) = ", MAX_DEPTH_PCT*100, "%"))
+  kpAddMainTitle(baf_depth_plot, main = title)
   kpAddChromosomeSeparators(baf_depth_plot, col = "darkgray", lty = 3, data.panel = "all")
 
   dev.off()
@@ -236,6 +252,10 @@ MAX_DEPTH <- round(quantile(df_gvcf$Depth, probs = MAX_DEPTH_PCT, names = FALSE)
 
 # Filter out low depth rows
 df_filtered <- df_vcf[df_vcf$Depth >= MIN_DEPTH, ]
+if (nrow(df_filtered) == 0) {
+  print("No rows with Depth >= MIN_DEPTH found. Returning original df_vcf.")
+  df_filtered <- df_vcf
+}
 
 # dynamic bin size choice
 BIN_SIZE <- ifelse(
@@ -253,11 +273,14 @@ write.table(df_gvcf, file=paste0(SAMPLE_NAME, ".gvcf.baf.tsv"), quote=FALSE, sep
 write.table(df_binned, file=paste0(SAMPLE_NAME, ".binned.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
 
 # convert dfs for baf plotting into snp.data for karyoploter
+print("Converting filtered dataframe to snp.data.baf format for karyoploter...")
 snp.data.baf <- get_snp_data_BAF(df_filtered)
 
 # convert dfs for depth plotting into snp.data for karyoploter
+print("Converting binned dataframe to snp.data.depth format for karyoploter...")
 snp.data.depth <- get_snp_data_Depth(df_binned)
 
 # generate plots and save them
+print("Generating BAF vs Depth plot...")
 get_plot(snp.data.baf, snp.data.depth, SAMPLE_NAME, MAX_DEPTH, CHR_NAMES, MIN_BAF, MAX_BAF, GENOME)
 
