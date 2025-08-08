@@ -98,7 +98,7 @@ SYMMETRY <- toupper(args$symmetry)
 # @parameter file
 # returns df
 
-read_to_df <- function(file, sym) {
+read_to_df <- function(file, sym, compute_baf = TRUE) {
   if (!file.exists(file)) {
     stop("File not found: ", file)
   }
@@ -112,30 +112,42 @@ read_to_df <- function(file, sym) {
   else {
     df <- read.table(file = file, header = FALSE)
   }
-  if (ncol(df) != 4) {
-    stop("Invalid TSV format: Expected 4 columns (CHROM, POS, DP, AD)")
-  }
-  colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
-  df <- df[!is.na(df$Allele_Depth) & !is.na(df$Depth), ]
-  if (!all(sapply(df[c("Position", "Depth")], is.numeric))) {
-    stop("Invalid TSV format: Position and Depth must be numeric")
-  }
 
   # calculate BAF
-  df[c("Ref_AD", "Alt_AD")] <- str_split_fixed(df$Allele_Depth, ",", 2)
-  df$RAF <- as.numeric(df$Ref_AD)
-  df$BAF <- as.numeric(df$Alt_AD)
-  # Avoid division by zero
-  df$RAF <- ifelse(df$Depth > 0, as.numeric(df$Ref_AD) / df$Depth, NA)
-  df$BAF <- ifelse(df$Depth > 0, as.numeric(df$Alt_AD) / df$Depth, NA)
+  if (isTRUE(compute_baf)){
+    if (ncol(df) != 4) {
+      stop("Invalid TSV format: Expected 4 columns (CHROM, POS, DP, AD)")
+    }
+    colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
+    df <- df[!is.na(df$Allele_Depth) & !is.na(df$Depth), ]
+    if (!all(sapply(df[c("Position", "Depth")], is.numeric))) {
+      stop("Invalid TSV format: Position and Depth must be numeric")
+    }
 
-  # Add symmetrical values if required
-  if (sym == TRUE) {
-    symmetric_df <- df
-    symmetric_df$BAF <- 1 - df$BAF
-    df <- rbind(df, symmetric_df)
+    df[c("Ref_AD", "Alt_AD")] <- str_split_fixed(df$Allele_Depth, ",", 2)
+    df$RAF <- as.numeric(df$Ref_AD)
+    df$BAF <- as.numeric(df$Alt_AD)
+    # Avoid division by zero
+    df$RAF <- ifelse(df$Depth > 0, as.numeric(df$Ref_AD) / df$Depth, NA)
+    df$BAF <- ifelse(df$Depth > 0, as.numeric(df$Alt_AD) / df$Depth, NA)
+    print(head(df, 10))
+    # Add symmetrical values if required
+    if (sym == TRUE) {
+      symmetric_df <- df
+      symmetric_df$BAF <- 1 - df$BAF
+      df <- rbind(df, symmetric_df)
+    }
+  } 
+  else {
+    # gVCF path: don’t compute BAF
+    if (ncol(df) != 3) {
+      stop("Invalid TSV format: Expected 3 columns for the gVCF (CHROM, POS, DP)")
+    }
+    colnames(df) <- c("Chr", "Position", "Depth")
+      if (!all(sapply(df[c("Position","Depth")], is.numeric))) {
+    stop("Invalid gVCF TSV: Position and Depth must be numeric")
   }
-
+  }
   return(df)
 }
 
@@ -242,10 +254,10 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
 ####################
 
 # read tsv file into df for BAF plot
-df_vcf <- read_to_df(VCF_FILE, SYMMETRY)
+df_vcf <- read_to_df(VCF_FILE, SYMMETRY, compute_baf = TRUE)
 
 # read tsv file into df for DEPTH plot
-df_gvcf <- read_to_df(GVCF_FILE, FALSE)
+df_gvcf <- read_to_df(GVCF_FILE, FALSE, compute_baf = FALSE)
 
 # get quantiles for plotting limits
 MAX_DEPTH <- round(quantile(df_gvcf$Depth, probs = MAX_DEPTH_PCT, names = FALSE), digits = 0)

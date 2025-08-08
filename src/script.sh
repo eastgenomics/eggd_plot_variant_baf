@@ -19,9 +19,11 @@ main() {
 
     tar -xzf $packages_path
     echo "R_LIBS_USER=~/R/library" >> ~/.Renviron
+    bcftools index "$vcf_path"
+    bcftools index "$gvcf_path"
 
-    bcftools query -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' $vcf_path -o "$vcf_prefix.vcf.tsv"
-    bcftools query -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' $gvcf_path -o "$gvcf_prefix.gvcf.tsv"
+    bcftools query -r "$chr_names" -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' $vcf_path -o "$vcf_prefix.vcf.tsv"
+    bcftools query -r "$chr_names" -f '%CHROM\t%POS[\t%DP]\n' "$gvcf_path" -o "$gvcf_prefix.gvcf.tsv"
 
     # construct optional argument string
     options=""
