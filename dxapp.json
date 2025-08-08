@@ -118,7 +118,23 @@
         "default": false,
         "optional": true,
         "help": "Whether to output a TSV file of the BAF dataframe for testing purposes. Default is False."
-      }
+      }, 
+      {
+      "name": "vcf_index",
+      "label": "VCF Index (optional)",
+      "class": "file",
+      "optional": true,
+      "patterns": ["*.tbi$", "*.csi$"],
+      "help": "Optional index for the VCF. If provided, region (-r) filtering will be applied on chr_names."
+      },
+      {
+      "name": "gvcf_index",
+      "label": "GVCF Index (optional)",
+      "class": "file",
+      "optional": true,
+      "patterns": ["*.tbi$", "*.csi$"],
+      "help": "Optional index for the gVCF. If provided, region (-r) filtering will be applied on chr_names."
+     }
     ],
     "outputSpec": [
       {

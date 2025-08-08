@@ -19,11 +19,23 @@ main() {
 
     tar -xzf $packages_path
     echo "R_LIBS_USER=~/R/library" >> ~/.Renviron
-    bcftools index "$vcf_path"
-    bcftools index "$gvcf_path"
 
-    bcftools query -r "$chr_names" -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' $vcf_path -o "$vcf_prefix.vcf.tsv"
-    bcftools query -r "$chr_names" -f '%CHROM\t%POS[\t%DP]\n' "$gvcf_path" -o "$gvcf_prefix.gvcf.tsv"
+
+    # Detect if we should apply -r based on index inputs
+    vcf_region_arg=""
+    gvcf_region_arg=""
+
+    if [[ -n "${vcf_index_path:-}" ]]; then
+    vcf_region_arg="-r $chr_names"
+    fi
+
+    if [[ -n "${gvcf_index_path:-}" ]]; then
+    gvcf_region_arg="-r $chr_names"
+    fi
+
+
+    bcftools query $vcf_region_arg -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' $vcf_path -o "$vcf_prefix.vcf.tsv"
+    bcftools query $gvcf_region_arg -f '%CHROM\t%POS[\t%DP]\n' "$gvcf_path" -o "$gvcf_prefix.gvcf.tsv"
 
     # construct optional argument string
     options=""
