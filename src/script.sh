@@ -26,13 +26,7 @@ main() {
     bcftools index -t "$vcf_path"
     # Filter VCFs by chromosome names
     bcftools query -r "$chr_names" -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' "$vcf_path" -o "$vcf_prefix.vcf.tsv"
-    echo "showing vcf_prefix.vcf.tsv tail"
-    tail "$vcf_prefix.vcf.tsv"
-
     bcftools query -r "$chr_names" -f '%CHROM\t%POS[\t%DP]\n' "$gvcf_path" -o "$gvcf_prefix.gvcf.tsv"
-    echo "gvcf tail"
-    tail "$gvcf_prefix.gvcf.tsv"
-
     # construct optional argument string
     options=""
     options+="--min_baf $min_baf "
