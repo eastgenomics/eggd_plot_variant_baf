@@ -2,7 +2,7 @@
     "name": "eggd_plot_variant_baf",
     "title": "eggd_plot_variant_baf",
     "summary": "Plot BAF and Depth with Karyoploter",
-    "version": "2.0.1",
+    "version": "2.1.0",
     "changeLog": [
         {
             "version": "2.0.0",
@@ -13,6 +13,11 @@
             "version": "2.0.1",
             "date": "2025-07-03",
             "description": "Stop app failing when vcf is empty (plot empty axis instead)."
+        },
+        {
+            "version": "2.1.0",
+            "date": "2025-08-12",
+            "description": "Updated the app to work with the Dias pipeline."
         }
     ],
     "inputSpec":
