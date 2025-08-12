@@ -152,7 +152,7 @@
       "file": "src/script.sh",
       "systemRequirements": {
         "*": {
-          "instanceType": "mem3_ssd1_v2_x4"
+          "instanceType": "mem3_ssd1_v2_x8"
         }
       },
       "assetDepends": [
