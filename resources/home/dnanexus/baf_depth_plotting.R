@@ -113,40 +113,34 @@ read_to_df <- function(file, sym, compute_baf = TRUE) {
     df <- read.table(file = file, header = FALSE)
   }
 
-  # calculate BAF
-  if (isTRUE(compute_baf)){
-    if (ncol(df) != 4) {
-      stop("Invalid TSV format: Expected 4 columns (CHROM, POS, DP, AD)")
-    }
-    colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
-    df <- df[!is.na(df$Allele_Depth) & !is.na(df$Depth), ]
-    if (!all(sapply(df[c("Position", "Depth")], is.numeric))) {
-      stop("Invalid TSV format: Position and Depth must be numeric")
-    }
 
+  # Assign column names based gVCF (compute_baf false) or VCF (compute_baf true)
+  if (isTRUE(compute_baf)) {
+    if (ncol(df) != 4) stop("Invalid TSV format: Expected 4 columns (CHROM, POS, DP, AD)")
+    colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
+  } else {
+    if (ncol(df) != 3) stop("Invalid TSV format: Expected 3 columns for the gVCF (CHROM, POS, DP)")
+    colnames(df) <- c("Chr", "Position", "Depth")
+  }
+  # Check Position & Depth are numeric
+  if (!all(sapply(df[c("Position", "Depth")], is.numeric))) {
+    stop("Invalid TSV: Position and Depth must be numeric")
+  }
+  # Compute BAF
+  if (isTRUE(compute_baf)) {
+    df <- df[!is.na(df$Allele_Depth) & !is.na(df$Depth), ]
     df[c("Ref_AD", "Alt_AD")] <- str_split_fixed(df$Allele_Depth, ",", 2)
     df$RAF <- as.numeric(df$Ref_AD)
     df$BAF <- as.numeric(df$Alt_AD)
     # Avoid division by zero
     df$RAF <- ifelse(df$Depth > 0, as.numeric(df$Ref_AD) / df$Depth, NA)
     df$BAF <- ifelse(df$Depth > 0, as.numeric(df$Alt_AD) / df$Depth, NA)
-    print(head(df, 10))
     # Add symmetrical values if required
-    if (sym == TRUE) {
+    if (isTRUE(sym)) {
       symmetric_df <- df
       symmetric_df$BAF <- 1 - df$BAF
       df <- rbind(df, symmetric_df)
     }
-  } 
-  else {
-    # gVCF path: don’t compute BAF
-    if (ncol(df) != 3) {
-      stop("Invalid TSV format: Expected 3 columns for the gVCF (CHROM, POS, DP)")
-    }
-    colnames(df) <- c("Chr", "Position", "Depth")
-      if (!all(sapply(df[c("Position","Depth")], is.numeric))) {
-    stop("Invalid gVCF TSV: Position and Depth must be numeric")
-  }
   }
   return(df)
 }
