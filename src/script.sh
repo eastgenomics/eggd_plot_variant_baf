@@ -20,13 +20,57 @@ main() {
     tar -xzf $packages_path
     echo "R_LIBS_USER=~/R/library" >> ~/.Renviron
 
+    # Derive prefixes for output filenames 
+    vcf_prefix=$(basename "$vcf_path"  | sed -E 's/\.vcf(\.gz)?$//')
+    gvcf_prefix=$(basename "$gvcf_path"| sed -E 's/\.vcf(\.gz)?$//')
 
-    # Index VCFs to enable filtering by region
-    bcftools index -t "$gvcf_path"
-    bcftools index -t "$vcf_path"
-    # Filter VCFs by chromosome names
-    bcftools query -r "$chr_names" -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' "$vcf_path" -o "$vcf_prefix.vcf.tsv"
-    bcftools query -r "$chr_names" -f '%CHROM\t%POS[\t%DP]\n' "$gvcf_path" -o "$gvcf_prefix.gvcf.tsv"
+    # Adapt region strings based on contig style
+    vcf_regions="$chr_names"
+    if bcftools view -h "$vcf_path" | grep -q '##contig=<ID=chr'; then
+        vcf_regions=$(awk -v RS=, -v ORS=, '{print "chr"$0}' <<< "$chr_names")
+        vcf_regions="${vcf_regions%,}"
+    fi
+
+    gvcf_regions="$chr_names"
+    if bcftools view -h "$gvcf_path" | grep -q '##contig=<ID=chr'; then
+        gvcf_regions=$(awk -v RS=, -v ORS=, '{print "chr"$0}' <<< "$chr_names")
+        gvcf_regions="${gvcf_regions%,}"
+    fi
+
+    echo "gvcf_regions = $gvcf_regions"
+
+    # Compress and index if needed
+    for var in vcf_path gvcf_path; do
+        path="${!var}"
+        if [[ "$path" != *.vcf.gz ]]; then
+            bgzip -c "$path" > "${path}.gz"
+            printf -v "$var" '%s' "${path}.gz"
+        fi
+        bcftools index -t "${!var}"
+    done
+
+    # Query VCF for CHROM, POS, depth and allele counts
+    bcftools query -r "$vcf_regions" \
+        -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' \
+        "$vcf_path" -o "${vcf_prefix}.vcf.tsv"
+
+    # Query gVCF with fallback logic FORMAT/MIN_DP -> FORMAT/DP ->  INFO/DP
+    bcftools query -u -r "$gvcf_regions" \
+        -f '%CHROM\t%POS\t[%MIN_DP]\t[%DP]\t%INFO/DP\n' "$gvcf_path" | \
+    awk -F'\t' 'BEGIN{OFS="\t"}{
+        dp=$3; 
+        if(dp=="."||dp=="") dp=$4; 
+        if(dp=="."||dp=="") dp=$5; 
+        print $1,$2,dp
+    }' > "${gvcf_prefix}.gvcf.tsv"
+
+    # Fail early if gVCF TSV is empty
+    if [ ! -s "${gvcf_prefix}.gvcf.tsv" ]; then
+        echo "Error: gVCF TSV is empty — check region string or file contents" >&2
+        exit 1
+    fi
+
+
     # construct optional argument string
     options=""
     options+="--min_baf $min_baf "
