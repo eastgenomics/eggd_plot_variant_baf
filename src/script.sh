@@ -59,13 +59,6 @@ main() {
         print $1,$2,dp
     }' > "${gvcf_prefix}.gvcf.tsv"
 
-    # Fail early if gVCF TSV is empty
-    if [ ! -s "${gvcf_prefix}.gvcf.tsv" ]; then
-        echo "Error: gVCF TSV is empty — check region string or file contents" >&2
-        exit 1
-    fi
-
-
     # construct optional argument string
     options=""
     options+="--min_baf $min_baf "
