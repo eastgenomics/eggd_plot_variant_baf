@@ -20,10 +20,6 @@ main() {
     tar -xzf $packages_path
     echo "R_LIBS_USER=~/R/library" >> ~/.Renviron
 
-    # Derive prefixes for output filenames 
-    vcf_prefix=$(basename "$vcf_path"  | sed -E 's/\.vcf(\.gz)?$//')
-    gvcf_prefix=$(basename "$gvcf_path"| sed -E 's/\.vcf(\.gz)?$//')
-
     # Adapt region strings based on contig style
     vcf_regions="$chr_names"
     if bcftools view -h "$vcf_path" | grep -q '##contig=<ID=chr'; then
