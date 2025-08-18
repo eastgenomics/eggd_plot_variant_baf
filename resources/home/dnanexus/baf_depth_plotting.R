@@ -114,20 +114,15 @@ read_to_df <- function(file, sym, compute_baf = TRUE) {
   }
 
 
-  # Assign column names based gVCF (compute_baf false) or VCF (compute_baf true)
-  if (isTRUE(compute_baf)) {
-    if (ncol(df) != 4) stop("Invalid TSV format: Expected 4 columns (CHROM, POS, DP, AD)")
-    colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
-  } else {
-    if (ncol(df) != 3) stop("Invalid TSV format: Expected 3 columns for the gVCF (CHROM, POS, DP)")
-    colnames(df) <- c("Chr", "Position", "Depth")
-  }
   # Check Position & Depth are numeric
   if (!all(sapply(df[c("Position", "Depth")], is.numeric))) {
     stop("Invalid TSV: Position and Depth must be numeric")
   }
   # Compute BAF
   if (isTRUE(compute_baf)) {
+    if (ncol(df) != 4) stop("Invalid TSV format: Expected 4 columns (CHROM, POS, DP, AD)")
+    # Assign column names
+    colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
     df <- df[!is.na(df$Allele_Depth) & !is.na(df$Depth), ]
     df[c("Ref_AD", "Alt_AD")] <- str_split_fixed(df$Allele_Depth, ",", 2)
     df$RAF <- as.numeric(df$Ref_AD)
@@ -141,6 +136,10 @@ read_to_df <- function(file, sym, compute_baf = TRUE) {
       symmetric_df$BAF <- 1 - df$BAF
       df <- rbind(df, symmetric_df)
     }
+  } else {
+    if (ncol(df) != 3) stop("Invalid TSV format: Expected 3 columns for the gVCF (CHROM, POS, DP)")
+    # Assign column names
+    colnames(df) <- c("Chr", "Position", "Depth")
   }
   return(df)
 }
