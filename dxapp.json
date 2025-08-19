@@ -85,6 +85,14 @@
         "help": "Minimum depth for plotting. Default is 5"
       },
       {
+        "name": "min_qual",
+        "label": "Minimum Quality",
+        "class": "int",
+        "default": 0,
+        "optional": true,
+        "help": "Minimum QUAL of variants for plotting. Default is 0"
+      },
+      {
         "name": "bin_size",
         "label": "Bin size",
         "class": "int",
