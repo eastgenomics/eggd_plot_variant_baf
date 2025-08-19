@@ -117,7 +117,6 @@ read_to_df <- function(file, sym, compute_baf = TRUE) {
     if (ncol(df) != 4) stop("Invalid TSV format: Expected 4 columns (CHROM, POS, DP, AD)")
     # Assign column names
     colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
-    head(df) # print first few rows for debugging
     df <- df[!is.na(df$Allele_Depth) & !is.na(df$Depth), ]
     # Check Position & Depth are numeric
     if (!all(sapply(df[c("Position", "Depth")], is.numeric))) {
@@ -139,7 +138,6 @@ read_to_df <- function(file, sym, compute_baf = TRUE) {
     if (ncol(df) != 3) stop("Invalid TSV format: Expected 3 columns for the gVCF (CHROM, POS, DP)")
     # Assign column names
     colnames(df) <- c("Chr", "Position", "Depth")
-    head(df) # print first few rows for debugging
       if (!all(sapply(df[c("Position", "Depth")], is.numeric))) {
         stop("Invalid TSV: Position and Depth must be numeric")
       }
