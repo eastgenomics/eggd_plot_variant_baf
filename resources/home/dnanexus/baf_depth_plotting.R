@@ -112,18 +112,17 @@ read_to_df <- function(file, sym, compute_baf = TRUE) {
   else {
     df <- read.table(file = file, header = FALSE)
   }
-
-
-  # Check Position & Depth are numeric
-  if (!all(sapply(df[c("Position", "Depth")], is.numeric))) {
-    stop("Invalid TSV: Position and Depth must be numeric")
-  }
   # Compute BAF
   if (isTRUE(compute_baf)) {
     if (ncol(df) != 4) stop("Invalid TSV format: Expected 4 columns (CHROM, POS, DP, AD)")
     # Assign column names
     colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
+    head(df) # print first few rows for debugging
     df <- df[!is.na(df$Allele_Depth) & !is.na(df$Depth), ]
+    # Check Position & Depth are numeric
+    if (!all(sapply(df[c("Position", "Depth")], is.numeric))) {
+      stop("Invalid TSV: Position and Depth must be numeric")
+    }
     df[c("Ref_AD", "Alt_AD")] <- str_split_fixed(df$Allele_Depth, ",", 2)
     df$RAF <- as.numeric(df$Ref_AD)
     df$BAF <- as.numeric(df$Alt_AD)
@@ -131,7 +130,7 @@ read_to_df <- function(file, sym, compute_baf = TRUE) {
     df$RAF <- ifelse(df$Depth > 0, as.numeric(df$Ref_AD) / df$Depth, NA)
     df$BAF <- ifelse(df$Depth > 0, as.numeric(df$Alt_AD) / df$Depth, NA)
     # Add symmetrical values if required
-    if (isTRUE(sym)) {
+    if (sym == TRUE) {
       symmetric_df <- df
       symmetric_df$BAF <- 1 - df$BAF
       df <- rbind(df, symmetric_df)
@@ -140,6 +139,10 @@ read_to_df <- function(file, sym, compute_baf = TRUE) {
     if (ncol(df) != 3) stop("Invalid TSV format: Expected 3 columns for the gVCF (CHROM, POS, DP)")
     # Assign column names
     colnames(df) <- c("Chr", "Position", "Depth")
+    head(df) # print first few rows for debugging
+      if (!all(sapply(df[c("Position", "Depth")], is.numeric))) {
+        stop("Invalid TSV: Position and Depth must be numeric")
+      }
   }
   return(df)
 }
