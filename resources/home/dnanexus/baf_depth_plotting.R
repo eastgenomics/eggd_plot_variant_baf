@@ -111,7 +111,7 @@ read_to_df <- function(file, sym, compute_baf = TRUE) {
   }
   else {
     df <- read.table(file = file, header = FALSE)
-    if(isTrue(compute_baf)){
+    if(isTRUE(compute_baf)){
       if (ncol(df) != 4) stop("Invalid TSV format: Expected 4 columns (CHROM, POS, DP, AD)")
       # Assign column names
       colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
