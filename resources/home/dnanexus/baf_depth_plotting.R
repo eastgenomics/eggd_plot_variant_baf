@@ -128,7 +128,7 @@ read_to_df <- function(file, sym, compute_baf = TRUE) {
     stop("Invalid TSV: Position and Depth must be numeric")
   }
   # Remove NA values in Depth
-      df <- df[!is.na(df$Depth), ]
+  df <- df[!is.na(df$Depth), ]
 
   # Compute BAF
   if (isTRUE(compute_baf)) {
