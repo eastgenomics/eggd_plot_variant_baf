@@ -48,7 +48,7 @@ main() {
         bcftools index -t "${!var}"
     done
 
-    if [[ min_qual -gt 0 ]]; then
+    if [[ "$min_qual" -gt 0 ]]; then
         echo "Filtering VCF: keeping QUAL >= ${min_qual}"
         bcftools view -i "QUAL>=${min_qual}" "$vcf_path" -Oz -o tmp.vcf.gz && mv tmp.vcf.gz "$vcf_path"
         bcftools index -f -t "$vcf_path"
