@@ -41,7 +41,7 @@ main() {
     # Compress and index if needed
     for var in vcf_path gvcf_path; do
         path="${!var}"
-        if [[ "$path" != *.vcf.gz ]]; then
+        if [[ "$path" != *.gz ]]; then
             bgzip -c "$path" > "${path}.gz"
             printf -v "$var" '%s' "${path}.gz"
         fi
