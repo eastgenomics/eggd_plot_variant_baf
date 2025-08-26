@@ -72,8 +72,6 @@ main() {
         if(dp=="."||dp=="") dp=$4; 
         print $1,$2,dp
     }' > "${gvcf_prefix}.gvcf.tsv"
-    head "${gvcf_prefix}.gvcf.tsv"
-    head "${vcf_prefix}.vcf.tsv"
 
     # construct optional argument string
     options=""
