@@ -138,6 +138,7 @@ read_to_df <- function(file, sym, compute_baf = TRUE) {
     if (ncol(df) != 3) stop("Invalid TSV format: Expected 3 columns for the gVCF (CHROM, POS, DP)")
     # Assign column names
     colnames(df) <- c("Chr", "Position", "Depth")
+    df <- df[!is.na(df$Depth), ]
       if (!all(sapply(df[c("Position", "Depth")], is.numeric))) {
         stop("Invalid TSV: Position and Depth must be numeric")
       }
