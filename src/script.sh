@@ -64,7 +64,7 @@ main() {
         -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' \
         "$vcf_path" -o "${vcf_prefix}.vcf.tsv"
 
-    # Query gVCF with fallback logic FORMAT/MIN_DP -> FORMAT/DP ->  INFO/DP
+    # Query gVCF with fallback logic FORMAT/DP ->  INFO/DP
     bcftools query -u -r "$gvcf_regions" \
         -f '%CHROM\t%POS\t[%DP]\t%INFO/DP\n' "$gvcf_path" | \
     awk -F'\t' 'BEGIN{OFS="\t"}{
