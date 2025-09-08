@@ -36,7 +36,8 @@ main() {
         gvcf_regions="${gvcf_regions%,}"
     fi
 
-    echo "gvcf_regions = $gvcf_regions"
+    # Remove all trailing newlines from region strings
+    gvcf_regions=$(echo "$gvcf_regions" | tr -d '\n')
 
     # Compress and index if needed
     for var in vcf_path gvcf_path; do

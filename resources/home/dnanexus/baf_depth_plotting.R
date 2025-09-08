@@ -265,12 +265,21 @@ df_vcf <- calculate_baf(df_vcf, SYMMETRY)
 # get quantiles for plotting limits
 MAX_DEPTH <- round(quantile(df_gvcf$Depth, probs = MAX_DEPTH_PCT, names = FALSE), digits = 0)
 
-# Filter out low depth rows
+# Filter out low depth rows for BAF plotting
 df_filtered <- df_vcf[df_vcf$Depth >= MIN_DEPTH, ]
 if (nrow(df_filtered) == 0) {
   print("No rows with Depth >= MIN_DEPTH found. Returning original df_vcf.")
   df_filtered <- df_vcf
 }
+
+
+# Filter out low depth rows for depth plotting
+df_gvcf <- df_gvcf[df_gvcf$Depth >= MIN_DEPTH, ]
+if (nrow(df_gvcf) == 0) {
+  message("No gVCF rows with Depth >= MIN_DEPTH found. Keeping all rows.")
+  df_gvcf <- read_to_df(GVCF_FILE)  # reload unfiltered if nothing survives
+}
+
 
 # dynamic bin size choice
 BIN_SIZE <- ifelse(
