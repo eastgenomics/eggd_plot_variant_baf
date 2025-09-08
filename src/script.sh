@@ -36,7 +36,9 @@ main() {
         gvcf_regions="${gvcf_regions%,}"
     fi
 
-    echo "gvcf_regions = $gvcf_regions"
+    # Remove all trailing newlines from region strings
+    gvcf_regions=$(echo "$gvcf_regions" | tr -d '\n')
+    vcf_regions=$(echo "$vcf_regions" | tr -d '\n')
 
     # Compress and index if needed
     for var in vcf_path gvcf_path; do
@@ -64,7 +66,7 @@ main() {
         -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' \
         "$vcf_path" -o "${vcf_prefix}.vcf.tsv"
 
-    # Query gVCF with fallback logic FORMAT/MIN_DP -> FORMAT/DP ->  INFO/DP
+    # Query gVCF with fallback logic FORMAT/DP ->  INFO/DP
     bcftools query -u -r "$gvcf_regions" \
         -f '%CHROM\t%POS\t[%DP]\t%INFO/DP\n' "$gvcf_path" | \
     awk -F'\t' 'BEGIN{OFS="\t"}{
