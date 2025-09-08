@@ -272,15 +272,6 @@ if (nrow(df_filtered) == 0) {
   df_filtered <- df_vcf
 }
 
-
-# Filter out low depth rows for depth plotting
-df_gvcf <- df_gvcf[df_gvcf$Depth >= MIN_DEPTH, ]
-if (nrow(df_gvcf) == 0) {
-  message("No gVCF rows with Depth >= MIN_DEPTH found. Keeping all rows.")
-  df_gvcf <- read_to_df(GVCF_FILE)  # reload unfiltered if nothing survives
-}
-
-
 # dynamic bin size choice
 BIN_SIZE <- ifelse(
   exists("BIN_SIZE"), BIN_SIZE,
