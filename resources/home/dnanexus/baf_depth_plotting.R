@@ -260,7 +260,10 @@ df_vcf <- read_to_df(VCF_FILE)
 df_gvcf <- read_to_df(GVCF_FILE)
 
 # calculate BAF values and add symmetrical values if required
-df_vcf <- calculate_baf(df_vcf, SYMMETRY)
+if (! (nrow(df_vcf) == 0)) {
+  df_vcf <- calculate_baf(df_vcf, SYMMETRY)
+}
+
 
 # get quantiles for plotting limits
 MAX_DEPTH <- round(quantile(df_gvcf$Depth, probs = MAX_DEPTH_PCT, names = FALSE), digits = 0)
