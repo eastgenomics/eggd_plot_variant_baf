@@ -1,15 +1,35 @@
 # eggd_plot_variant_baf
 
 ## What does this app do?
-Plots BAF and depth of variants from given VCF/GVCF pair.
+Plots BAF and depth of variants from given VCF/GVCF pair. The BAF plot is the top panel and the Depth plot is the bottom panel.
 
 
 ## What data are required for this app to run?
 **Required input files:**
-1. A VCF file (`.vcf`) - containing the VEP filtered variants for the BAF plot.
-2. A GVCF file (`.gvcf`) - containing the merged small variants for the depth plot.
+1. A VCF file (`.vcf`) - Provides allele counts (AD) and depth (DP) for the BAF plot.
+2. A GVCF file (`.gvcf`) - containing the depth across all sites for the depth plot.
 3. R packages (`.tar.gz`) - compressed tarball of R packages needed to generate plot.
 <br>
+
+### Optional input Parameters:
+
+#### Parameters for BAF plot:
+- `min_baf` : The minimum BAF for the baf plot. Default is 0.04
+- `max_baf` : The maximum BAF for the baf plot. Default is 0.96
+- `min_depth` : The minimum depth for the BAF plot. Default is 5
+- `symmetry` : Input to plot symmetrical points on the BAF plot. Default is true.
+
+#### Parameters for Depth plot:
+- `bin_size` : The bin size to use for plotting depth.
+- `max_depth` : The maximum depth for the plots used to set the y-axis. Points above this cut are drawn in magenta. Default is 0.9.
+
+
+#### Common Parameters for both plots:
+- `bed_filter` : The BED file used to filter the input VCFs.
+- `genome` : Genome build for plotting. Default is hg19, alternative value is hg38.
+- `min_qual` : The minimum QUAL of variants for plotting. Default is 0
+- `chr_names` : Chromosome names used for axis labels and to filter VCF contigs.
+- `output_tsv` : Whether to output a TSV file of the BAF dataframe for testing purposes. Default is False.
 
 **R Packages and Versions:**
 
@@ -38,6 +58,15 @@ sudo apt-get install -y libssl-dev libxml2-dev gcc pkg-config
 ## What does this app output?
 This app outputs:
 - `{prefix}.png` : Image of the generated plot in PNG format.
+
+### If output_tsv is set to True:
+- `prefix`.vcf.baf.tsv : tsv that contains the fields `Chr, Position, Depth, Ref_AD, Alt_AD, RAF, BAF`
+- `prefix`.filtered.baf.tsv tsv that contains the fields `Chr, Position, Depth, Ref_AD, Alt_AD, RAF, BAF` with variants with Depth >= min_depth and between `min_baf` and `max_baf`.
+- `prefix`.gcf.baf.tsv : Contains the Chr, Position and Depth from the GVCF input.
+- `prefix`.binned.baf.tsv : Contains the binned version of GVCF depth data. Contains `Chr, Position, mean_depth`
+
+
+
 
 
 ## How to run this app from command line?
