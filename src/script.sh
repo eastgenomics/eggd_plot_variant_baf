@@ -49,6 +49,18 @@ main() {
         fi
         bcftools index -t "${!var}"
     done
+echo "bed_filter_path = $bed_filter_path"
+
+    # Filter by BED if provided
+    if [ -n "$bed_filter_path" ]; then
+        echo "Filtering VCF and gVCF by BED regions from $bed_filter_path"
+        bcftools view -R "$bed_filter_path" "$vcf_path" -Oz -o tmp.vcf.gz && mv tmp.vcf.gz "$vcf_path"
+        bcftools index -f -t "$vcf_path"
+
+        echo "Applying BED filter to gVCF"
+        bcftools view -R "$bed_filter_path" "$gvcf_path" -Oz -o tmp.gvcf.gz && mv tmp.gvcf.gz "$gvcf_path"
+        bcftools index -f -t "$gvcf_path"
+    fi
 
     if [[ "$min_qual" -gt 0 ]]; then
         echo "Filtering VCF: keeping QUAL >= ${min_qual}"
