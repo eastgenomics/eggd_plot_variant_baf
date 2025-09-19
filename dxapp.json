@@ -93,6 +93,16 @@
         "help": "Minimum QUAL of variants for plotting. Default is 0"
       },
       {
+        "name": "bed_filter",
+        "label": "Bed used to filter the VCF and GVCF",
+        "class": "file",
+        "optional": true,
+        "help": "BED files used to filter the VCF and GVCF (eg. capture regions). If not provided, all variants will be used.",
+        "patterns": [
+          "*.bed$", "*.bed.gz$"
+        ]
+      },
+      {
         "name": "bin_size",
         "label": "Bin size",
         "class": "int",
