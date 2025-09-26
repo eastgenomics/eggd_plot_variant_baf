@@ -53,6 +53,16 @@ echo "bed_filter_path = $bed_filter_path"
 
     # Filter by BED if provided
     if [ -n "$bed_filter_path" ]; then
+        # Check for BED file compression and index:
+        # If the file is gzipped (.gz), it must be indexed for bcftools -R
+        if [[ "$bed_filter_path" == *.gz ]]; then
+            # Check if the required .tbi or .csi index exists
+            if ! [ -f "${bed_filter_path}.tbi" ] && ! [ -f "${bed_filter_path}.csi" ]; then
+                tabix -p bed "$bed_filter_path"
+            else
+                echo "BED file is gzipped and index found."
+            fi
+        fi
         echo "Filtering VCF and gVCF by BED regions from $bed_filter_path"
         bcftools view -R "$bed_filter_path" "$vcf_path" -Oz -o tmp.vcf.gz && mv tmp.vcf.gz "$vcf_path"
         bcftools index -f -t "$vcf_path"
