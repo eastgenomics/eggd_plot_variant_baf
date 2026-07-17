@@ -16,6 +16,10 @@ library(karyoploteR, quietly = TRUE)
 library(dplyr, quietly = TRUE)
 library(polars, quietly = TRUE)
 library(argparse, quietly = TRUE)
+library(data.table, quietly = TRUE)
+#library(ggplot2, quietly = TRUE)
+#library(plotly, quietly = TRUE)
+#library(htmlwidgets, quietly = TRUE)
 
 # Get configurable inputs via command line
 ####################################################
@@ -45,12 +49,12 @@ parser$add_argument("--genome", type="character", default="hg19",
     help="Genome build for plotKaryotype function [default %(default)s]")
 parser$add_argument("--symmetry", type="logical", default=TRUE,
     help="Whether to plot BAF symmetrically [default %(default)s]")
-                                        
+
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults,
 args <- parser$parse_args()
 
-# Validate percentile parameter  
+# Validate percentile parameter
 if (args$max_depth < 0 || args$max_depth > 1) {
   stop("max_depth must be a percentile value between 0 and 1")
 }
@@ -109,25 +113,26 @@ read_to_df <- function(file) {
     return(empty_df)
   }
   else {
-    df <- read.table(file = file, header = FALSE)
+    df <- data.table::fread(file, header = FALSE)
     if (ncol(df) == 4) {
-    colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
+      df <- df[, 1:4]
+      colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
     # Remove rows with NA in Depth or Allele_Depth
     df <- df[!is.na(df$Allele_Depth) & !is.na(df$Depth), ]
     } else if (ncol(df) == 3) {
       colnames(df) <- c("Chr", "Position", "Depth")
-      # Remove rows with NA in Depth 
+      # Remove rows with NA in Depth
       df <- df[!is.na(df$Depth), ]
     }
     else {
       stop("Invalid TSV format: Expected 3 or 4 columns (CHROM, POS, DP[, AD])")
     }
     # Check Position & Depth are numeric
-    if (!all(sapply(df[c("Position", "Depth")], is.numeric))) {
-      stop("Invalid TSV: Position and Depth must be numeric")
+    if (!is.numeric(df$Position) || !is.numeric(df$Depth)) {
+        stop("Invalid TSV: Position and Depth must be numeric")
     }
     # Return Dataframe
-    return(df)
+    return(as.data.frame(df))
 }
 }
 
@@ -148,7 +153,7 @@ calculate_baf <- function(df, sym) {
       symmetric_df$BAF <- 1 - df$BAF
       df <- rbind(df, symmetric_df)
     }
-  return(df)
+  return(as.data.frame(df))
 } 
 
 # Function to return dfs with binned depth
@@ -157,15 +162,16 @@ calculate_baf <- function(df, sym) {
 # returns df_binned
 
 bin_df <- function(df, bin_size) {
-  polars_df <- as_polars_df(df[order(df$Chr, df$Position), ])
-  rolling_df <- polars_df$rolling(
-    index_column = "Position",
-    group_by = "Chr",
-    period = paste(as.character(bin_size), "i", sep = "")
-  )$agg(mean_depth = pl$mean("Depth"))$gather_every(bin_size)
-  df_binned <- rolling_df$to_data_frame()
-
-  return(df_binned)
+  # Convert to data.table by reference (no memory copy)
+  setDT(df)
+  # Sort in place
+  setorder(df, Chr, Position)
+  # Create bin groups and calculate mean depth simultaneously
+  df[, bin := floor(Position / bin_size) * bin_size]
+  df_binned <- df[, .(Position = bin[1], mean_depth = mean(Depth, na.rm = TRUE)), by = .(Chr, bin)]
+  # Remove the temporary bin column
+  df_binned[, bin := NULL]
+  return(as.data.frame(df_binned))
 }
 
 
@@ -200,7 +206,7 @@ get_snp_data_Depth <- function(df) {
 # @parameters min_baf and max_baf - integers : include only variants in range min_baf < BAF < max_baf
 # returns plot
 
-get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_names, min_baf, max_baf, genome_build) {
+get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_names, min_baf, max_baf, genome_build, median_depths) {
   file_name_png <- paste0(SAMPLE_NAME, ".baf.png")
   png(file_name_png, width = 15, height = 5, units = "in", res = 600)
   plot_parameters <- getDefaultPlotParams(plot.type = 4)
@@ -208,40 +214,47 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
   baf_depth_plot <- plotKaryotype(genome = genome_build, plot.type = 4, ideogram.plotter = NULL, plot.params = plot_parameters, labels.plotter = NULL)
   kpAddChromosomeNames(baf_depth_plot, chr.names = chr_names)
   kpAddCytobandsAsLine(baf_depth_plot) # Add centromeres
+
+  # Alpha transparency added here to prevent blobs
+  col_baf <- adjustcolor("darkorange2", alpha.f = 0.3)
+  col_depth_norm <- adjustcolor("darkblue", alpha.f = 0.3)
+  col_depth_high <- adjustcolor("magenta", alpha.f = 0.3)
+
   # top graph
   baf_threshold <- which(snp.data.baf$BAF > min_baf & snp.data.baf$BAF <= max_baf)
-  modified_high_depth <- snp.data.depth$mean_depth > max_depth # get values above max_depth
-  snp.data.depth$mean_depth <- pmin(snp.data.depth$mean_depth, max_depth) # assign the max to max_depth
-  modified_depth <- ifelse(
-    modified_high_depth, 'magenta', 'darkblue'
-  ) # Assign colors based on the mean_depth
+  modified_high_depth <- snp.data.depth$mean_depth > max_depth 
+  snp.data.depth$mean_depth <- pmin(snp.data.depth$mean_depth, max_depth) 
+
+  modified_depth <- ifelse(modified_high_depth, col_depth_high, col_depth_norm) 
+
   kpAxis(baf_depth_plot, r0 = 0.55, r1 = 1, tick.pos = c(0, 0.25, 0.5, 0.75, 1))
   kpAbline(baf_depth_plot, h=c(0.25, 0.5, 0.75), lty = 0.5, r0 =0.55, r1=1)
-  # only add points if snp.data.baf is not empty
+
   if (length(snp.data.baf) > 0) {
+    # Reduced point size (cex)
     kpPoints(baf_depth_plot,
       data = snp.data.baf[baf_threshold], y = snp.data.baf[baf_threshold]$BAF,
-      cex = 0.5, r0 = 0.55, r1 = 1, col = "darkorange2"
+      cex = 0.2, r0 = 0.55, r1 = 1, col = col_baf
     )
-    title = paste0("BAF vs Depth for ", SAMPLE_NAME)
-  }
-  else {
-    title = paste0("Provided VCFs contain insufficient data for plotting - ", SAMPLE_NAME)
+    title <- paste0("BAF vs Depth for ", SAMPLE_NAME)
+  } else {
+    title <- paste0("Provided VCFs contain insufficient data for plotting - ", SAMPLE_NAME)
   }
   # bottom graph
   kpAxis(baf_depth_plot, r0 = 0, r1 = 0.45, ymax = max_depth, ymin = 0)
   kpPoints(baf_depth_plot,
     data = snp.data.depth, y = snp.data.depth$mean_depth,
-    cex = 0.5, r0 = 0, r1 = 0.45, ymax = max_depth, ymin = 0, col = modified_depth
+    cex = 0.2, r0 = 0, r1 = 0.45, ymax = max_depth, ymin = 0, col = modified_depth
   )
+
   # add horizontal line at median depth for each chromosome
   df <- data.frame(x = snp.data.depth)
-  median_depths <- tapply(df$x.mean_depth, df$x.seqnames, median, na.rm = TRUE)
   for (chr in unique(df$x.seqnames)) {
+    # Subset the vector using the chromosome name
     median_depth <- median_depths[chr]
-    prop <- median_depth / max_depth # scale to the bottom plot
     if (!is.na(median_depth)) {
-      kpAbline(baf_depth_plot, h=prop, chr=chr, col = "darkred", lwd = 3, r0 = 0, r1 = 0.45)
+      prop <- median_depth / max_depth # scale to the bottom plot
+      kpAbline(baf_depth_plot, h=prop, chr=chr, col = "darkred", lwd = 3, r0 = 0, r1 = 0.45, ymin = 0, ymax = max_depth)
     }
   }
   kpAddMainTitle(baf_depth_plot, main = title)
@@ -255,15 +268,27 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
 
 # read tsv file into df for BAF plot
 df_vcf <- read_to_df(VCF_FILE)
+write.table(df_vcf, file=paste0(SAMPLE_NAME, ".vcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
 
 # read tsv file into df for DEPTH plot
 df_gvcf <- read_to_df(GVCF_FILE)
+write.table(df_gvcf, file=paste0(SAMPLE_NAME, ".gvcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
+
+# DOWNSAMPLE BAF for readability and memory reduction
+# 50,000 points is more than enough to clearly see zygosity without blacking out the plot
+
+set.seed(42)
+
+MAX_PLOT_POINTS <- 50000
+if (nrow(df_vcf) > MAX_PLOT_POINTS) {
+  print(paste("Downsampling BAF data from", nrow(df_vcf), "to", MAX_PLOT_POINTS, "points for plot readability..."))
+  df_vcf <- df_vcf[sample(nrow(df_vcf), MAX_PLOT_POINTS), ]
+}
 
 # calculate BAF values and add symmetrical values if required
 if (! (nrow(df_vcf) == 0)) {
   df_vcf <- calculate_baf(df_vcf, SYMMETRY)
 }
-
 
 # get quantiles for plotting limits
 MAX_DEPTH <- round(quantile(df_gvcf$Depth, probs = MAX_DEPTH_PCT, names = FALSE), digits = 0)
@@ -283,14 +308,26 @@ BIN_SIZE <- ifelse(
 
 # aggregate gvcf df into binned df for depth plot
 df_binned <- bin_df(df_gvcf, BIN_SIZE)
+snp.data.depth_full <- get_snp_data_Depth(df_binned)
+df_full <- data.frame(x = snp.data.depth_full)
+median_depths <- tapply(df_full$x.mean_depth, df_full$x.seqnames, median, na.rm = TRUE)
 
-# make tsvs for testing if needed
-write.table(df_vcf, file=paste0(SAMPLE_NAME, ".vcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
-write.table(df_filtered, file=paste0(SAMPLE_NAME, ".filtered.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
-write.table(df_gvcf, file=paste0(SAMPLE_NAME, ".gvcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
 write.table(df_binned, file=paste0(SAMPLE_NAME, ".binned.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
 
-# convert dfs for baf plotting into snp.data for karyoploter
+# DOWNSAMPLE BINNED DATA for readability and memory reduction
+# 50,000 points is more than enough to clearly see depth distribution without blacking out the plot
+MAX_BINNED_POINTS <- 50000
+if (nrow(df_binned) > MAX_BINNED_POINTS) {
+  print(paste("Downsampling binned depth data from", nrow(df_binned), "to", MAX_BINNED_POINTS, "points for plot readability..."))
+  # Use systematic sampling to maintain genomic distribution (taking every Nth row)
+  step_size <- ceiling(nrow(df_binned) / MAX_BINNED_POINTS)
+  df_binned <- df_binned[seq(1, nrow(df_binned), by = step_size), ]
+}
+
+# MEMORY CLEAR: Removed massive intermediate write.tables here.
+rm(df_vcf, df_gvcf)
+gc()
+
 print("Converting filtered dataframe to snp.data.baf format for karyoploter...")
 snp.data.baf <- get_snp_data_BAF(df_filtered)
 
@@ -300,5 +337,4 @@ snp.data.depth <- get_snp_data_Depth(df_binned)
 
 # generate plots and save them
 print("Generating BAF vs Depth plot...")
-get_plot(snp.data.baf, snp.data.depth, SAMPLE_NAME, MAX_DEPTH, CHR_NAMES, MIN_BAF, MAX_BAF, GENOME)
-
+get_plot(snp.data.baf, snp.data.depth, SAMPLE_NAME, MAX_DEPTH, CHR_NAMES, MIN_BAF, MAX_BAF, GENOME, median_depths)
