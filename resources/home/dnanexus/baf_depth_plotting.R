@@ -251,10 +251,11 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
   df <- data.frame(x = snp.data.depth)
   for (chr in unique(df$x.seqnames)) {
     # Subset the vector using the chromosome name
+    #median_depths <- tapply(df$x.mean_depth, df$x.seqnames, median, na.rm = TRUE) 
     median_depth <- median_depths[chr]
     if (!is.na(median_depth)) {
       prop <- median_depth / max_depth # scale to the bottom plot
-      kpAbline(baf_depth_plot, h=prop, chr=chr, col = "darkred", lwd = 3, r0 = 0, r1 = 0.45, ymin = 0, ymax = max_depth)
+      kpAbline(baf_depth_plot, h=prop, chr=chr, col = "darkred", lwd = 3, r0 = 0, r1 = 0.45)
     }
   }
   kpAddMainTitle(baf_depth_plot, main = title)
