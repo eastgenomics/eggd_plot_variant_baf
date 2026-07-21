@@ -76,3 +76,22 @@ dx run eggd_plot_variant_baf \
 -ipackages=file-xxxx  \
 --destination="output/eggd_plot_variant_baf"
 ```
+With all possible imput parametres
+```
+dx run eggd_plot_variant_baf \
+  -ivcf=project-xxxx:file-xxxx \
+  -igvcf=project-xxxx:file-xxxx \
+  -ipackages_path=project-xxxx:file-xxxx \
+  -ibed_filter=project-xxxx:file-xxxx \
+  -imin_baf=0.05 \
+  -imax_baf=0.95 \
+  -imin_depth=20 \
+  -isymmetry=true \
+  -ibin_size=1000 \
+  -imax_depth=0.98 \
+  -igenome="hg38" \
+  -imin_qual=30 \
+  -ichr_names="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y" \
+  -ioutput_tsv=true \
+  --destination="project-xxxx:/output/eggd_plot_variant_baf"
+```
