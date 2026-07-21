@@ -65,7 +65,7 @@ This app outputs:
 
 
 ## How to run this app from command line?
-With essential imput parameters:
+With essential input parameters:
 ```
 dx run eggd_plot_variant_baf \
 -ivcf=file-xxxx \
@@ -77,7 +77,7 @@ dx run eggd_plot_variant_baf \
 -ipackages=file-xxxx  \
 --destination="output/eggd_plot_variant_baf"
 ```
-With all possible imput parameters:
+With all possible input parameters:
 ```
 dx run eggd_plot_variant_baf \
   -ivcf=project-xxxx:file-xxxx \
