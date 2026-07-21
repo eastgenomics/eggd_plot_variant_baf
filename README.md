@@ -60,8 +60,8 @@ This app outputs:
 - `{prefix}.png` : Image of the generated plot in PNG format.
 
 ### If output_tsv is set to True:
-{SAMPLE_NAME}.vcf.baf.tsv : TSV containing the raw, unfiltered data from the VCF input. Includes fields Chr, Position, Depth, Ref_AD, Alt_AD, RAF, BAF.
-{SAMPLE_NAME}.gvcf.baf.tsv : TSV containing the raw data from the GVCF input. Includes fields Chr, Position, Depth.
+- `{SAMPLE_NAME}.vcf.baf.tsv` : TSV containing the raw, unfiltered data from the VCF input. Includes fields Chr, Position, Depth, Ref_AD, Alt_AD, RAF, BAF.
+- `{SAMPLE_NAME}.gvcf.baf.tsv` : TSV containing the raw data from the GVCF input. Includes fields Chr, Position, Depth.
 
 
 ## How to run this app from command line?
