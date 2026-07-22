@@ -18,6 +18,7 @@ Plots BAF and depth of variants from given VCF/GVCF pair. The output PNG contain
 - `max_baf` : The maximum BAF for the baf plot. Default is 0.96
 - `min_depth` : The minimum depth for the BAF plot. Default is 5
 - `symmetry` : Whether to plot symmetrical points on the BAF plot (BAF and 1-BAF). Default is true.
+- `max_pop_af` : The maximum Population Allele Frequency to keep (e.g., 0.05). If NULL, no AF filtering is applied.Default is NULL.
 
 #### Parameters for Depth plot:
 - `bin_size : The bin size to use for plotting depth. If left blank, the app will dynamically calculate an appropriate bin size based on the input size. It defaults to a bin size of 1 for small targeted datasets (fewer than 2,000 data points).
@@ -80,19 +81,20 @@ dx run eggd_plot_variant_baf \
 With all possible input parameters:
 ```
 dx run eggd_plot_variant_baf \
-  -ivcf=project-xxxx:file-xxxx \
-  -igvcf=project-xxxx:file-xxxx \
-  -ipackages_path=project-xxxx:file-xxxx \
-  -ibed_filter=project-xxxx:file-xxxx \
-  -imin_baf=0.05 \
-  -imax_baf=0.95 \
-  -imin_depth=20 \
-  -isymmetry=true \
-  -ibin_size=1000 \
-  -imax_depth=0.98 \
-  -igenome="hg38" \
-  -imin_qual=30 \
-  -ichr_names="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y" \
-  -ioutput_tsv=true \
-  --destination="project-xxxx:/output/eggd_plot_variant_baf"
+-ivcf=project-xxxx:file-xxxx \
+-igvcf=project-xxxx:file-xxxx \
+-ipackages_path=project-xxxx:file-xxxx \
+-ibed_filter=project-xxxx:file-xxxx \
+-imin_baf=0.05 \
+-imax_baf=0.95 \
+-imin_depth=20 \
+-isymmetry=true \
+-imax_pop_af=0.05 \
+-ibin_size=1000 \
+-imax_depth=0.98 \
+-igenome="hg38" \
+-imin_qual=30 \
+-ichr_names="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y" \
+-ioutput_tsv=true \
+--destination="project-xxxx:/output/eggd_plot_variant_baf"
 ```
