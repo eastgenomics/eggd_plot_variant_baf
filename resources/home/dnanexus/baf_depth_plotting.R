@@ -50,8 +50,6 @@ parser$add_argument("--symmetry", type="logical", default=TRUE,
     help="Whether to plot BAF symmetrically [default %(default)s]")
 parser$add_argument("--output_tsv", type="logical", default=FALSE,
     help="Whether to write TSV outputs [default %(default)s]")
-parser$add_argument("--max_pop_af", type="double", default=NULL,
-    help="Maximum Population Allele Frequency to keep (e.g., 0.05). If NULL, no AF filtering is applied.")
 
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults,
@@ -117,20 +115,10 @@ read_to_df <- function(file,max_pop_af = NULL) {
   }
   else {
     df <- data.table::fread(file, header = FALSE)
-    if (ncol(df) == 5) {
-      df <- df[, 1:5]
-      colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth", "Pop_AF")
+    if (ncol(df) == 4) {
+    colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
     # Remove rows with NA in Depth or Allele_Depth
     df <- df[!is.na(df$Allele_Depth) & !is.na(df$Depth), ]
-
-    # Filter out common variants (e.g., Population AF > 5%)
-    # Coerce to numeric in case missing values were parsed as "."
-    if (!is.null(max_pop_af)) {
-        suppressWarnings({
-          df$Pop_AF <- as.numeric(as.character(df$Pop_AF))
-        })
-        df <- df[is.na(df$Pop_AF) | df$Pop_AF <= max_pop_af, ]
-      }
     } else if (ncol(df) == 3) {
       colnames(df) <- c("Chr", "Position", "Depth")
       # Remove rows with NA in Depth
