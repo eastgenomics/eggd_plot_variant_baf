@@ -319,7 +319,7 @@ if (is.null(BIN_SIZE)) {
 # aggregate gvcf df into binned df for depth plot
 df_binned <- bin_df(df_gvcf, BIN_SIZE)
 snp.data.depth_full <- get_snp_data_Depth(df_binned)
-df_full <- as.data.frame(snp.data.depth_full)
+df_full <- data.frame(x = snp.data.depth_full)
 median_depths <- tapply(df_full$x.mean_depth, df_full$x.seqnames, median, na.rm = TRUE)
 
 # DOWNSAMPLE BINNED DATA for readability and memory reduction
