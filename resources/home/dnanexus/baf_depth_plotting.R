@@ -17,7 +17,6 @@ library(dplyr, quietly = TRUE)
 library(polars, quietly = TRUE)
 library(argparse, quietly = TRUE)
 library(data.table, quietly = TRUE)
-#library(ggplot2, quietly = TRUE)
 #library(plotly, quietly = TRUE)
 #library(htmlwidgets, quietly = TRUE)
 
@@ -49,6 +48,10 @@ parser$add_argument("--genome", type="character", default="hg19",
     help="Genome build for plotKaryotype function [default %(default)s]")
 parser$add_argument("--symmetry", type="logical", default=TRUE,
     help="Whether to plot BAF symmetrically [default %(default)s]")
+parser$add_argument("--output_tsv", type="logical", default=FALSE,
+    help="Whether to write TSV outputs [default %(default)s]")
+parser$add_argument("--max_pop_af", type="double", default=NULL,
+    help="Maximum Population Allele Frequency to keep (e.g., 0.05). If NULL, no AF filtering is applied.")
 
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults,
@@ -101,7 +104,7 @@ SYMMETRY <- isTRUE(args$symmetry)
 # Function to read files into dfs
 # @parameter file
 # returns df
-read_to_df <- function(file) {
+read_to_df <- function(file,max_pop_af = NULL) {
   if (!file.exists(file)) {
     stop("File not found: ", file)
   }
@@ -114,11 +117,20 @@ read_to_df <- function(file) {
   }
   else {
     df <- data.table::fread(file, header = FALSE)
-    if (ncol(df) == 4) {
-      df <- df[, 1:4]
-      colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
+    if (ncol(df) == 5) {
+      df <- df[, 1:5]
+      colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth", "Pop_AF")
     # Remove rows with NA in Depth or Allele_Depth
     df <- df[!is.na(df$Allele_Depth) & !is.na(df$Depth), ]
+
+    # Filter out common variants (e.g., Population AF > 5%)
+    # Coerce to numeric in case missing values were parsed as "."
+    if (!is.null(max_pop_af)) {
+        suppressWarnings({
+          df$Pop_AF <- as.numeric(as.character(df$Pop_AF))
+        })
+        df <- df[is.na(df$Pop_AF) | df$Pop_AF <= max_pop_af, ]
+      }
     } else if (ncol(df) == 3) {
       colnames(df) <- c("Chr", "Position", "Depth")
       # Remove rows with NA in Depth
@@ -141,18 +153,21 @@ read_to_df <- function(file) {
 # @parameter sym - logical: whether to add symmetrical BAF values
 # Returns df 
 calculate_baf <- function(df, sym) {
-  df[c("Ref_AD", "Alt_AD")] <- str_split_fixed(df$Allele_Depth, ",", 2)
+  df[c("Ref_AD", "Alt_AD")] <- str_split_fixed(df$Allele_Depth, ",", 3)[, 1:2]
   df$RAF <- as.numeric(df$Ref_AD)
   df$BAF <- as.numeric(df$Alt_AD)
   # Avoid division by zero
   df$RAF <- ifelse(df$Depth > 0, as.numeric(df$Ref_AD) / df$Depth, NA)
-  df$BAF <- ifelse(df$Depth > 0, as.numeric(df$Alt_AD) / df$Depth, NA)
+  df$BAF <- ifelse((as.numeric(df$Ref_AD) + as.numeric(df$Alt_AD)) > 0, 
+                   as.numeric(df$Alt_AD) / (as.numeric(df$Ref_AD) + as.numeric(df$Alt_AD)), NA) #calculate BAF strictly relative to the read counts of the two main alleles
       # Add symmetrical values if required
   if (isTRUE(sym)) {
       symmetric_df <- df
       symmetric_df$BAF <- 1 - df$BAF
       df <- rbind(df, symmetric_df)
     }
+  df <- df[!is.na(df$BAF), ]
+  
   return(as.data.frame(df))
 } 
 
@@ -251,7 +266,6 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
   df <- data.frame(x = snp.data.depth)
   for (chr in unique(df$x.seqnames)) {
     # Subset the vector using the chromosome name
-    #median_depths <- tapply(df$x.mean_depth, df$x.seqnames, median, na.rm = TRUE) 
     median_depth <- median_depths[chr]
     if (!is.na(median_depth)) {
       prop <- median_depth / max_depth # scale to the bottom plot
@@ -268,31 +282,16 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
 ####################
 
 # read tsv file into df for BAF plot
-df_vcf <- read_to_df(VCF_FILE)
-write.table(df_vcf, file=paste0(SAMPLE_NAME, ".vcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
+df_vcf <- read_to_df(VCF_FILE, args$max_pop_af)
 
 # read tsv file into df for DEPTH plot
 df_gvcf <- read_to_df(GVCF_FILE)
-write.table(df_gvcf, file=paste0(SAMPLE_NAME, ".gvcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
 
-# DOWNSAMPLE BAF for readability and memory reduction
-# 50,000 points is more than enough to clearly see zygosity without blacking out the plot
-
-set.seed(42)
-
-MAX_PLOT_POINTS <- 50000
-if (nrow(df_vcf) > MAX_PLOT_POINTS) {
-  print(paste("Downsampling BAF data from", nrow(df_vcf), "to", MAX_PLOT_POINTS, "points for plot readability..."))
-  df_vcf <- df_vcf[sample(nrow(df_vcf), MAX_PLOT_POINTS), ]
+if (args$output_tsv) {
+  print("User requested TSVs. Writing raw data before plotting to disk...")
+  write.table(df_vcf, file=paste0(SAMPLE_NAME, ".vcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
+  write.table(df_gvcf, file=paste0(SAMPLE_NAME, ".gvcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
 }
-
-# calculate BAF values and add symmetrical values if required
-if (! (nrow(df_vcf) == 0)) {
-  df_vcf <- calculate_baf(df_vcf, SYMMETRY)
-}
-
-# get quantiles for plotting limits
-MAX_DEPTH <- round(quantile(df_gvcf$Depth, probs = MAX_DEPTH_PCT, names = FALSE), digits = 0)
 
 # Filter out low depth rows for BAF plotting
 df_filtered <- df_vcf[df_vcf$Depth >= MIN_DEPTH, ]
@@ -301,19 +300,39 @@ if (nrow(df_filtered) == 0) {
   df_filtered <- df_vcf
 }
 
+# DOWNSAMPLE BAF for readability and memory reduction
+# 50,000 points is more than enough to clearly see zygosity without blacking out the plot
+
+set.seed(42)
+
+MAX_PLOT_POINTS <- 50000
+if (nrow(df_filtered) > MAX_PLOT_POINTS) {
+  print(paste("Downsampling BAF data from", nrow(df_filtered), "to", MAX_PLOT_POINTS, "points for plot readability..."))
+  df_filtered <- df_filtered[sample(nrow(df_filtered), MAX_PLOT_POINTS), ]
+}
+
+# calculate BAF values and add symmetrical values if required
+if (! (nrow(df_filtered) == 0)) {
+  df_filtered <- calculate_baf(df_filtered, SYMMETRY)
+}
+
+# get quantiles for plotting limits
+MAX_DEPTH <- round(quantile(df_gvcf$Depth, probs = MAX_DEPTH_PCT, names = FALSE), digits = 0)
+
 # dynamic bin size choice
-BIN_SIZE <- ifelse(
-  exists("BIN_SIZE"), BIN_SIZE,
-  ifelse(length(df_gvcf$Depth)/2000 >= 1, round(length(df_gvcf$Depth)/2000), 1)
-)
+if (is.null(BIN_SIZE)) {
+  if ((length(df_gvcf$Depth) / 2000) >= 1) {
+    BIN_SIZE <- round(length(df_gvcf$Depth) / 2000)
+  } else {
+    BIN_SIZE <- 1
+  }
+}
 
 # aggregate gvcf df into binned df for depth plot
 df_binned <- bin_df(df_gvcf, BIN_SIZE)
 snp.data.depth_full <- get_snp_data_Depth(df_binned)
-df_full <- data.frame(x = snp.data.depth_full)
+df_full <- as.data.frame(snp.data.depth_full)
 median_depths <- tapply(df_full$x.mean_depth, df_full$x.seqnames, median, na.rm = TRUE)
-
-write.table(df_binned, file=paste0(SAMPLE_NAME, ".binned.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
 
 # DOWNSAMPLE BINNED DATA for readability and memory reduction
 # 50,000 points is more than enough to clearly see depth distribution without blacking out the plot
