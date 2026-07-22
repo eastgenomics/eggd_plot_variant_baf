@@ -141,7 +141,7 @@ read_to_df <- function(file,max_pop_af = NULL) {
 # @parameter sym - logical: whether to add symmetrical BAF values
 # Returns df 
 calculate_baf <- function(df, sym) {
-  df[c("Ref_AD", "Alt_AD")] <- str_split_fixed(df$Allele_Depth, ",", 3)[, 1:2]
+  df[c("Ref_AD", "Alt_AD")] <- str_split_fixed(df$Allele_Depth, ",", 2)
   df$RAF <- as.numeric(df$Ref_AD)
   df$BAF <- as.numeric(df$Alt_AD)
   # Avoid division by zero
