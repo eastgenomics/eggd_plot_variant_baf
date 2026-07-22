@@ -17,6 +17,9 @@ main() {
     sudo dpkg -i libncurses5_6.2-0ubuntu2_amd64.deb
     sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
 
+    # ADD THIS LINE: Install the missing system ICU library that stringi needs
+    sudo apt-get update && sudo apt-get install -y libicu-dev
+
     tar -xzf $packages_path
     echo "R_LIBS_USER=~/R/library" >> ~/.Renviron
 
@@ -83,11 +86,10 @@ echo "bed_filter_path = $bed_filter_path"
         bcftools index -f -t "$gvcf_path"
     fi
 
-    # Query VCF for CHROM, POS, depth and allele counts
+    # Query VCF for CHROM, POS, depth, allele counts and allele frequency
     bcftools query -r "$vcf_regions" \
-        -f '%CHROM\t%POS\t%INFO/DP\t[ %AD]\n' \
+        -f '%CHROM\t%POS\t%INFO/DP\t[%AD]\t.\n' \
         "$vcf_path" -o "${vcf_prefix}.vcf.tsv"
-
     # Query gVCF with fallback logic FORMAT/DP ->  INFO/DP
     bcftools query -u -r "$gvcf_regions" \
         -f '%CHROM\t%POS\t[%DP]\t%INFO/DP\n' "$gvcf_path" | \
@@ -103,11 +105,17 @@ echo "bed_filter_path = $bed_filter_path"
     options+="--max_baf $max_baf "
     options+="--max_depth $max_depth "
     options+="--min_depth $min_depth "
-    options+="--bin_size $bin_size "
+    if [ -n "$bin_size" ]; then
+        options+="--bin_size $bin_size "
+    fi
     options+="--chr_names $chr_names "
     options+="--genome $genome "
     options+="--symmetry $symmetry "
-
+    if [ "$output_tsv" = true ]; then
+        options+="--output_tsv TRUE "
+    else
+        options+="--output_tsv FALSE "
+    fi
 
     # Run R script with error handling
     if ! Rscript baf_depth_plotting.R --vcf "$vcf_prefix.vcf.tsv" --gvcf "$gvcf_prefix.gvcf.tsv" $options; then
