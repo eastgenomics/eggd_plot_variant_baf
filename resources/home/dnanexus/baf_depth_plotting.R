@@ -102,7 +102,7 @@ SYMMETRY <- isTRUE(args$symmetry)
 # Function to read files into dfs
 # @parameter file
 # returns df
-read_to_df <- function(file,max_pop_af = NULL) {
+read_to_df <- function(file) {
   if (!file.exists(file)) {
     stop("File not found: ", file)
   }
@@ -270,7 +270,7 @@ get_plot <- function(snp.data.baf, snp.data.depth, file_name, max_depth, chr_nam
 ####################
 
 # read tsv file into df for BAF plot
-df_vcf <- read_to_df(VCF_FILE, args$max_pop_af)
+df_vcf <- read_to_df(VCF_FILE)
 
 # read tsv file into df for DEPTH plot
 df_gvcf <- read_to_df(GVCF_FILE)
