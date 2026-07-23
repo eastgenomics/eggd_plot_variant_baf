@@ -88,7 +88,7 @@ echo "bed_filter_path = $bed_filter_path"
 
     # Query VCF for CHROM, POS, depth, allele counts and allele frequency
     bcftools query -r "$vcf_regions" \
-        -f '%CHROM\t%POS\t%INFO/DP\t[%AD]\t.\n' \
+        -f '%CHROM\t%POS\t%INFO/DP\t[%AD]\n' \
         "$vcf_path" -o "${vcf_prefix}.vcf.tsv"
     # Query gVCF with fallback logic FORMAT/DP ->  INFO/DP
     bcftools query -u -r "$gvcf_regions" \
