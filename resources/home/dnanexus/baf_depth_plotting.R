@@ -17,8 +17,6 @@ library(dplyr, quietly = TRUE)
 library(polars, quietly = TRUE)
 library(argparse, quietly = TRUE)
 library(data.table, quietly = TRUE)
-#library(plotly, quietly = TRUE)
-#library(htmlwidgets, quietly = TRUE)
 
 # Get configurable inputs via command line
 ####################################################
