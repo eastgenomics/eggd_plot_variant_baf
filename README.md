@@ -18,7 +18,6 @@ Plots BAF and depth of variants from given VCF/GVCF pair. The output PNG contain
 - `max_baf` : The maximum BAF for the baf plot. Default is 0.96
 - `min_depth` : The minimum depth for the BAF plot. Default is 5
 - `symmetry` : Whether to plot symmetrical points on the BAF plot (BAF and 1-BAF). Default is true.
-- `max_pop_af` : The maximum Population Allele Frequency to keep (e.g., 0.05). If NULL, no AF filtering is applied.Default is NULL.
 
 #### Parameters for Depth plot:
 - `bin_size : The bin size to use for plotting depth. If left blank, the app will dynamically calculate an appropriate bin size based on the input size. It defaults to a bin size of 1 for small targeted datasets (fewer than 2,000 data points).
