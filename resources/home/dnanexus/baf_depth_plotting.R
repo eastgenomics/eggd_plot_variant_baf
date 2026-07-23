@@ -275,12 +275,6 @@ df_vcf <- read_to_df(VCF_FILE)
 # read tsv file into df for DEPTH plot
 df_gvcf <- read_to_df(GVCF_FILE)
 
-if (args$output_tsv) {
-  print("User requested TSVs. Writing raw data before plotting to disk...")
-  write.table(df_vcf, file=paste0(SAMPLE_NAME, ".vcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
-  write.table(df_gvcf, file=paste0(SAMPLE_NAME, ".gvcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
-}
-
 # Filter out low depth rows for BAF plotting
 df_filtered <- df_vcf[df_vcf$Depth >= MIN_DEPTH, ]
 if (nrow(df_filtered) == 0) {
@@ -302,6 +296,12 @@ if (nrow(df_filtered) > MAX_PLOT_POINTS) {
 # calculate BAF values and add symmetrical values if required
 if (! (nrow(df_filtered) == 0)) {
   df_filtered <- calculate_baf(df_filtered, SYMMETRY)
+}
+
+if (args$output_tsv) {
+  print("User requested TSVs. Writing calculated data before plotting to disk...")
+  write.table(df_filtered, file=paste0(SAMPLE_NAME, ".vcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
+  write.table(df_gvcf, file=paste0(SAMPLE_NAME, ".gvcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
 }
 
 # get quantiles for plotting limits
