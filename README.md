@@ -74,7 +74,7 @@ dx run eggd_plot_variant_baf \
 -imin_depth=20 \
 -imin_baf=0 \
 -imax_baf=1
--ipackages=file-xxxx  \
+-ipackages_path=file-xxxx  \
 --destination="output/eggd_plot_variant_baf"
 ```
 With all possible input parameters:
