@@ -20,7 +20,7 @@ Plots BAF and depth of variants from given VCF/GVCF pair. The output PNG contain
 - `symmetry` : Whether to plot symmetrical points on the BAF plot (BAF and 1-BAF). Default is true.
 
 #### Parameters for Depth plot:
-- `bin_size : The bin size to use for plotting depth. If left blank, the app will dynamically calculate an appropriate bin size based on the input size. It defaults to a bin size of 1 for small targeted datasets (fewer than 2,000 data points).
+- `bin_size` : The bin size to use for plotting depth. If left blank, the app will dynamically calculate an appropriate bin size based on the input size. It defaults to a bin size of 1 for small targeted datasets (fewer than 2,000 data points).
 - `max_depth` : The maximum depth for the depth plot (percentile) used to set the y-axis. Points above this cut are drawn in magenta. Default is 0.9.
 
 
