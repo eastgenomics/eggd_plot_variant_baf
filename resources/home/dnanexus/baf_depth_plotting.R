@@ -114,7 +114,7 @@ read_to_df <- function(file) {
     return(empty_df)
   }
   else {
-    df <- data.table::fread(file, header = FALSE)
+    df <- data.table::fread(file, header = FALSE, sep = "\t", na.strings = c("NA", ".", ""))
     if (ncol(df) == 4) {
     colnames(df) <- c("Chr", "Position", "Depth", "Allele_Depth")
     # Remove rows with NA in Depth or Allele_Depth
