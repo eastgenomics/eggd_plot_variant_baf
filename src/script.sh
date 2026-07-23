@@ -16,8 +16,6 @@ main() {
     sudo dpkg -i libtinfo5_6.2-0ubuntu2_amd64.deb
     sudo dpkg -i libncurses5_6.2-0ubuntu2_amd64.deb
     sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
-
-    # ADD THIS LINE: Install the missing system ICU library that stringi needs
     sudo apt-get update && sudo apt-get install -y libicu-dev
 
     tar -xzf $packages_path
