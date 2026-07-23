@@ -88,7 +88,6 @@ dx run eggd_plot_variant_baf \
 -imax_baf=0.95 \
 -imin_depth=20 \
 -isymmetry=true \
--imax_pop_af=0.05 \
 -ibin_size=1000 \
 -imax_depth=0.98 \
 -igenome="hg38" \
