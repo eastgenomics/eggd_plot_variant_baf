@@ -286,9 +286,10 @@ if (nrow(df_filtered) == 0) {
 set.seed(42)
 
 MAX_PLOT_POINTS <- 50000
-if (nrow(df_filtered) > MAX_PLOT_POINTS) {
-  print(paste("Downsampling BAF data from", nrow(df_filtered), "to", MAX_PLOT_POINTS, "points for plot readability..."))
-  df_filtered <- df_filtered[sample(nrow(df_filtered), MAX_PLOT_POINTS), ]
+plot_point_cap <- if (isTRUE(SYMMETRY)) MAX_PLOT_POINTS / 2 else MAX_PLOT_POINTS
+if (nrow(df_filtered) > plot_point_cap) {
+  print(paste("Downsampling BAF data from", nrow(df_filtered), "to", plot_point_cap, "points for plot readability..."))
+  df_filtered <- df_filtered[sample(nrow(df_filtered), plot_point_cap), ]
 }
 
 # calculate BAF values and add symmetrical values if required
