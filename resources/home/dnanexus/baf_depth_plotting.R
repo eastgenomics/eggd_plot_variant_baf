@@ -141,7 +141,7 @@ read_to_df <- function(file) {
 # @parameter sym - logical: whether to add symmetrical BAF values
 # Returns df 
 calculate_baf <- function(df, sym) {
-  df[c("Ref_AD", "Alt_AD")] <- str_split_fixed(df$Allele_Depth, ",", 2)
+  df[c("Ref_AD", "Alt_AD")] <- str_split_fixed(df$Allele_Depth, ",", 3)[, 1:2]
   df$RAF <- as.numeric(df$Ref_AD)
   df$BAF <- as.numeric(df$Alt_AD)
   # Avoid division by zero
@@ -319,7 +319,7 @@ if (is.null(BIN_SIZE)) {
 # aggregate gvcf df into binned df for depth plot
 df_binned <- bin_df(df_gvcf, BIN_SIZE)
 snp.data.depth_full <- get_snp_data_Depth(df_binned)
-df_full <- data.frame(x = snp.data.depth_full)
+df_full <- data.frame(x=snp.data.depth_full)
 median_depths <- tapply(df_full$x.mean_depth, df_full$x.seqnames, median, na.rm = TRUE)
 
 # DOWNSAMPLE BINNED DATA for readability and memory reduction
