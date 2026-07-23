@@ -74,7 +74,7 @@ dx run eggd_plot_variant_baf \
 -imin_depth=20 \
 -imin_baf=0 \
 -imax_baf=1
--ipackages_path=file-xxxx  \
+-ipackages=file-xxxx  \
 --destination="output/eggd_plot_variant_baf"
 ```
 With all possible input parameters:
@@ -82,7 +82,7 @@ With all possible input parameters:
 dx run eggd_plot_variant_baf \
 -ivcf=project-xxxx:file-xxxx \
 -igvcf=project-xxxx:file-xxxx \
--ipackages_path=project-xxxx:file-xxxx \
+-ipackages=project-xxxx:file-xxxx \
 -ibed_filter=project-xxxx:file-xxxx \
 -imin_baf=0.05 \
 -imax_baf=0.95 \
