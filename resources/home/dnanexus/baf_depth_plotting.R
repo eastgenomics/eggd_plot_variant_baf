@@ -317,9 +317,8 @@ if (is.null(BIN_SIZE)) {
 
 # aggregate gvcf df into binned df for depth plot
 df_binned <- bin_df(df_gvcf, BIN_SIZE)
-snp.data.depth_full <- get_snp_data_Depth(df_binned)
-df_full <- data.frame(x=snp.data.depth_full)
-median_depths <- tapply(df_full$x.mean_depth, df_full$x.seqnames, median, na.rm = TRUE)
+snp_data <- get_snp_data_Depth(df_binned)
+median_depths <- tapply(snp_data$mean_depth, snp_data$seqnames, median, na.rm = TRUE)
 
 # DOWNSAMPLE BINNED DATA for readability and memory reduction
 # 50,000 points is more than enough to clearly see depth distribution without blacking out the plot
