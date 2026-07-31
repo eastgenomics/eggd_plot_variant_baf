@@ -14,7 +14,6 @@
 library(stringr, quietly = TRUE)
 library(karyoploteR, quietly = TRUE)
 library(dplyr, quietly = TRUE)
-library(polars, quietly = TRUE)
 library(argparse, quietly = TRUE)
 library(data.table, quietly = TRUE)
 
@@ -146,14 +145,17 @@ calculate_baf <- function(df, sym) {
   df$RAF <- ifelse(df$Depth > 0, as.numeric(df$Ref_AD) / df$Depth, NA)
   df$BAF <- ifelse((as.numeric(df$Ref_AD) + as.numeric(df$Alt_AD)) > 0, 
                    as.numeric(df$Alt_AD) / (as.numeric(df$Ref_AD) + as.numeric(df$Alt_AD)), NA) #calculate BAF strictly relative to the read counts of the two main alleles
-      # Add symmetrical values if required
+  # Delete large intermediate columns to free memory
+  df$Allele_Depth <- NULL
+
+  # Add symmetrical values if required
   if (isTRUE(sym)) {
       symmetric_df <- df
       symmetric_df$BAF <- 1 - df$BAF
       df <- rbind(df, symmetric_df)
     }
   df <- df[!is.na(df$BAF), ]
-  
+  gc()
   return(as.data.frame(df))
 } 
 
