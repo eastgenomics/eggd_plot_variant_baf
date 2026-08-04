@@ -20,7 +20,7 @@ Plots BAF and depth of variants from given VCF/GVCF pair. The output PNG contain
 - `symmetry` : Whether to plot symmetrical points on the BAF plot (BAF and 1-BAF). Default is true.
 
 #### Parameters for Depth plot:
-- `bin_size` : The bin size to use for plotting depth.
+- `bin_size` : The bin size to use for plotting depth. If left blank, the app will dynamically calculate an appropriate bin size based on the input size. It defaults to a bin size of 1 for small targeted datasets (fewer than 2,000 data points).
 - `max_depth` : The maximum depth for the depth plot (percentile) used to set the y-axis. Points above this cut are drawn in magenta. Default is 0.9.
 
 
@@ -60,16 +60,12 @@ This app outputs:
 - `{prefix}.png` : Image of the generated plot in PNG format.
 
 ### If output_tsv is set to True:
-- `prefix`.vcf.baf.tsv : tsv that contains the fields `Chr, Position, Depth, Ref_AD, Alt_AD, RAF, BAF`
-- `prefix`.filtered.baf.tsv tsv that contains the fields `Chr, Position, Depth, Ref_AD, Alt_AD, RAF, BAF` from the VCF input used for BAF plots. It contains variants with Depth >= min_depth and between `min_baf` and `max_baf`.
-- `prefix`.gvcf.baf.tsv : Contains the Chr, Position and Depth from the GVCF input.
-- `prefix`.binned.baf.tsv : Contains the binned version of GVCF depth data. Contains `Chr, Position, mean_depth`
-
-
-
+- `{SAMPLE_NAME}.vcf.baf.tsv` : TSV containing the filtered and calculated data from the VCF input before plotting. Includes fields Chr, Position, Ref_AD, Alt_AD, RAF, BAF.
+- `{SAMPLE_NAME}.gvcf.baf.tsv` : TSV containing the raw data from the GVCF input. Includes fields Chr, Position, Depth.
 
 
 ## How to run this app from command line?
+With essential input parameters:
 ```
 dx run eggd_plot_variant_baf \
 -ivcf=file-xxxx \
@@ -80,4 +76,23 @@ dx run eggd_plot_variant_baf \
 -imax_baf=1
 -ipackages=file-xxxx  \
 --destination="output/eggd_plot_variant_baf"
+```
+With all possible input parameters:
+```
+dx run eggd_plot_variant_baf \
+-ivcf=project-xxxx:file-xxxx \
+-igvcf=project-xxxx:file-xxxx \
+-ipackages=project-xxxx:file-xxxx \
+-ibed_filter=project-xxxx:file-xxxx \
+-imin_baf=0.05 \
+-imax_baf=0.95 \
+-imin_depth=20 \
+-isymmetry=true \
+-ibin_size=1000 \
+-imax_depth=0.98 \
+-igenome="hg38" \
+-imin_qual=30 \
+-ichr_names="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y" \
+-ioutput_tsv=true \
+--destination="project-xxxx:/output/eggd_plot_variant_baf"
 ```
