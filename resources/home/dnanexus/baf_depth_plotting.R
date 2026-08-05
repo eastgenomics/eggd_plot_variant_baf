@@ -60,6 +60,11 @@ if (args$max_depth < 0 || args$max_depth > 1) {
   stop("max_depth must be a percentile value between 0 and 1")
 }
 
+# Validate max data number parameter
+if (is.na(args$max_data_number) || args$max_data_number <= 0) {
+  stop("Error: max_data_number must be a positive integer.")
+}
+
 # get sample name & check they're the same for the two inputs
 SAMPLE_NAME <- str_split_1(sub("\\.vcf\\.tsv$", "", basename(args$vcf)), "_")[1]
 if (SAMPLE_NAME != str_split_1(sub("\\.gvcf\\.tsv$", "", basename(args$gvcf)), "_")[1]) {
