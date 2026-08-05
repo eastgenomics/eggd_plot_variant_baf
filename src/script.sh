@@ -106,6 +106,7 @@ echo "bed_filter_path = $bed_filter_path"
     if [ -n "$bin_size" ]; then
         options+="--bin_size $bin_size "
     fi
+    options+="--max_data_number $max_data_number "    
     options+="--chr_names $chr_names "
     options+="--genome $genome "
     options+="--symmetry $symmetry "

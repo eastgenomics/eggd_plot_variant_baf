@@ -39,6 +39,8 @@ parser$add_argument("--min_depth", type="integer", default=5,
     help="Minimum depth allowed [default %(default)s]")
 parser$add_argument("--bin_size", type="integer",
     help="Bin size for reducing noise in depth plot")
+parser$add_argument("--max_data_number", type="integer",default=50000,
+    help="Maximum number of data points to display")
 parser$add_argument("--chr_names", type="character", default="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y",
     help="Chromosome names [default %(default)s]")
 parser$add_argument("--genome", type="character", default="hg19",
@@ -48,6 +50,7 @@ parser$add_argument("--symmetry", type="logical", default=TRUE,
 parser$add_argument("--output_tsv", type="logical", default=FALSE,
     help="Whether to write TSV outputs [default %(default)s]")
 
+
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults,
 args <- parser$parse_args()
@@ -55,6 +58,11 @@ args <- parser$parse_args()
 # Validate percentile parameter
 if (args$max_depth < 0 || args$max_depth > 1) {
   stop("max_depth must be a percentile value between 0 and 1")
+}
+
+# Validate max data number parameter
+if (is.na(args$max_data_number) || args$max_data_number <= 0) {
+  stop("Error: max_data_number must be a positive integer.")
 }
 
 # get sample name & check they're the same for the two inputs
@@ -85,6 +93,10 @@ MIN_DEPTH <- args$min_depth
 
 # Bin size for depth plot
 BIN_SIZE <- args$bin_size
+
+# Data point number for plots display
+MAX_PLOT_POINTS <- args$max_data_number
+MAX_BINNED_POINTS <- args$max_data_number
 
 # Genome build for plotKaryotype function
 GENOME <- args$genome
@@ -287,7 +299,6 @@ if (nrow(df_filtered) == 0) {
 
 set.seed(42)
 
-MAX_PLOT_POINTS <- 50000
 plot_point_cap <- if (isTRUE(SYMMETRY)) MAX_PLOT_POINTS / 2 else MAX_PLOT_POINTS
 if (nrow(df_filtered) > plot_point_cap) {
   print(paste("Downsampling BAF data from", nrow(df_filtered), "to", plot_point_cap, "points for plot readability..."))
@@ -325,7 +336,6 @@ median_depths <- tapply(df$x.mean_depth, df$x.seqnames, median, na.rm = TRUE)
 
 # DOWNSAMPLE BINNED DATA for readability and memory reduction
 # 50,000 points is more than enough to clearly see depth distribution without blacking out the plot
-MAX_BINNED_POINTS <- 50000
 if (nrow(df_binned) > MAX_BINNED_POINTS) {
   print(paste("Downsampling binned depth data from", nrow(df_binned), "to", MAX_BINNED_POINTS, "points for plot readability..."))
   # Use systematic sampling to maintain genomic distribution (taking every Nth row)

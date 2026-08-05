@@ -121,6 +121,14 @@
         "help": "Bin size to use for plotting depth (reduces noise). Default = 500."
       },
       {
+        "name": "max_data_number",
+        "label": "Maximum data points",
+        "class": "int",
+        "default": 50000,
+        "optional": true,
+        "help": "Maximum number of data points to display on the plot. Default is 50000."
+      },
+      {
         "name": "chr_names",
         "label": "Chromosome names",
         "class": "string",
