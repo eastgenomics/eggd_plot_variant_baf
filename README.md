@@ -30,7 +30,7 @@ Plots BAF and depth of variants from given VCF/GVCF pair. The output PNG contain
 - `min_qual` : The minimum QUAL of variants for plotting. Default is 0
 - `chr_names` : Chromosome names used for axis labels and to filter VCF contigs. They must be a subset of the chromosomes in the input VCFs.
 - `output_tsv` : Whether to output a TSV file of the BAF dataframe for testing purposes. Default is False.
-- `max_data_number` : Maximum number of data points to display on the plot. Default is 50000."
+- `max_data_number` : Maximum number of data points to display on the plot. Default is 50000.
 
 **R Packages and Versions:**
 
