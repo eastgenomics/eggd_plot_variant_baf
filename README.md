@@ -61,8 +61,10 @@ This app outputs:
 - `{prefix}.png` : Image of the generated plot in PNG format.
 
 ### If output_tsv is set to True:
-- `{SAMPLE_NAME}.vcf.baf.tsv` : TSV containing the filtered and calculated data from the VCF input before plotting. Includes fields Chr, Position, Ref_AD, Alt_AD, RAF, BAF.
+- `{SAMPLE_NAME}.vcf.baf.tsv` : TSV containing the raw data from the VCF input. Includes fields Chr, Position, Depth, Allele_Depth.
 - `{SAMPLE_NAME}.gvcf.baf.tsv` : TSV containing the raw data from the GVCF input. Includes fields Chr, Position, Depth.
+- `{SAMPLE_NAME}.filtered.baf.tsv` : TSV containing the filtered and calculated data from the VCF input before plotting. Includes fields Chr, Position, Depth, Ref_AD, Alt_AD, RAF, BAF.
+- `{SAMPLE_NAME}.binned.baf.tsv` : TSV containing the binned and calculated data from the GVCF input before plotting. Includes fields Chr, Position, mean_depth.
 
 
 ## How to run this app from command line?
