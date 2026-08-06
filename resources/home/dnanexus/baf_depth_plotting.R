@@ -39,7 +39,7 @@ parser$add_argument("--min_depth", type="integer", default=5,
     help="Minimum depth allowed [default %(default)s]")
 parser$add_argument("--bin_size", type="integer",
     help="Bin size for reducing noise in depth plot")
-parser$add_argument("--max_data_number", type="integer",default=50000,
+parser$add_argument("--max_data_number", type="integer",default=100000,
     help="Maximum number of data points to display")
 parser$add_argument("--chr_names", type="character", default="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y",
     help="Chromosome names [default %(default)s]")
@@ -287,6 +287,12 @@ df_vcf <- read_to_df(VCF_FILE)
 # read tsv file into df for DEPTH plot
 df_gvcf <- read_to_df(GVCF_FILE)
 
+if (args$output_tsv) {
+  print("User requested TSVs. Writing raw data before filtration...")
+  write.table(df_vcf, file=paste0(SAMPLE_NAME, ".vcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
+  write.table(df_gvcf, file=paste0(SAMPLE_NAME, ".gvcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
+}
+
 # Filter out low depth rows for BAF plotting
 df_filtered <- df_vcf[df_vcf$Depth >= MIN_DEPTH, ]
 if (nrow(df_filtered) == 0) {
@@ -308,12 +314,6 @@ if (nrow(df_filtered) > plot_point_cap) {
 # calculate BAF values and add symmetrical values if required
 if (! (nrow(df_filtered) == 0)) {
   df_filtered <- calculate_baf(df_filtered, SYMMETRY)
-}
-
-if (args$output_tsv) {
-  print("User requested TSVs. Writing calculated data before plotting to disk...")
-  write.table(df_filtered, file=paste0(SAMPLE_NAME, ".vcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
-  write.table(df_gvcf, file=paste0(SAMPLE_NAME, ".gvcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
 }
 
 # get quantiles for plotting limits
@@ -341,6 +341,12 @@ if (nrow(df_binned) > MAX_BINNED_POINTS) {
   # Use systematic sampling to maintain genomic distribution (taking every Nth row)
   step_size <- ceiling(nrow(df_binned) / MAX_BINNED_POINTS)
   df_binned <- df_binned[seq(1, nrow(df_binned), by = step_size), ]
+}
+
+if (args$output_tsv) {
+  print("User requested TSVs. Writing calculated data before plotting to disk...")
+  write.table(df_filtered, file=paste0(SAMPLE_NAME, ".filtered.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
+  write.table(df_binned, file=paste0(SAMPLE_NAME, ".binned.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
 }
 
 # MEMORY CLEAR: Removed massive intermediate write.tables here.

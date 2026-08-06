@@ -124,9 +124,9 @@
         "name": "max_data_number",
         "label": "Maximum data points",
         "class": "int",
-        "default": 50000,
+        "default": 100000,
         "optional": true,
-        "help": "Maximum number of data points to display on the plot. Default is 50000."
+        "help": "Maximum number of data points to display on the plot. Default is 100000."
       },
       {
         "name": "chr_names",
