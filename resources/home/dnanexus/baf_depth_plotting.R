@@ -39,7 +39,7 @@ parser$add_argument("--min_depth", type="integer", default=5,
     help="Minimum depth allowed [default %(default)s]")
 parser$add_argument("--bin_size", type="integer",
     help="Bin size for reducing noise in depth plot")
-parser$add_argument("--max_data_number", type="integer",default=50000,
+parser$add_argument("--max_data_number", type="integer",default=100000,
     help="Maximum number of data points to display")
 parser$add_argument("--chr_names", type="character", default="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y",
     help="Chromosome names [default %(default)s]")
