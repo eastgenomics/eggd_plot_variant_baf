@@ -288,7 +288,7 @@ df_vcf <- read_to_df(VCF_FILE)
 df_gvcf <- read_to_df(GVCF_FILE)
 
 if (args$output_tsv) {
-  print("User requested TSVs. Writing calculated data before plotting to disk...")
+  print("User requested TSVs. Writing raw data before filtration...")
   write.table(df_vcf, file=paste0(SAMPLE_NAME, ".vcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
   write.table(df_gvcf, file=paste0(SAMPLE_NAME, ".gvcf.baf.tsv"), quote=FALSE, sep='\t', col.names = NA)
 }
