@@ -155,8 +155,7 @@ calculate_baf <- function(df, sym) {
   df$BAF <- as.numeric(df$Alt_AD)
   # Avoid division by zero
   df$RAF <- ifelse(df$Depth > 0, as.numeric(df$Ref_AD) / df$Depth, NA)
-  df$BAF <- ifelse((as.numeric(df$Ref_AD) + as.numeric(df$Alt_AD)) > 0, 
-                   as.numeric(df$Alt_AD) / (as.numeric(df$Ref_AD) + as.numeric(df$Alt_AD)), NA) #calculate BAF strictly relative to the read counts of the two main alleles
+  df$BAF <- ifelse(df$Depth > 0, as.numeric(df$Alt_AD) / df$Depth, NA)
   # Delete large intermediate columns to free memory
   df$Allele_Depth <- NULL
 
