@@ -3,7 +3,6 @@
 ## What does this app do?
 Plots BAF and depth of variants from given VCF/GVCF pair. The output PNG contains two panels. The BAF plot is the top panel and the Depth plot is the bottom panel.
 
-
 ## What data are required for this app to run?
 **Required input files:**
 1. A VCF file (`.vcf`) - Provides allele counts (AD) and depth (DP) for the BAF plot.
@@ -22,7 +21,6 @@ Plots BAF and depth of variants from given VCF/GVCF pair. The output PNG contain
 #### Parameters for Depth plot:
 - `bin_size` : The bin size to use for plotting depth. If left blank, the app will dynamically calculate an appropriate bin size based on the input size. It defaults to a bin size of 1 for small targeted datasets (fewer than 2,000 data points).
 - `max_depth` : The maximum depth for the depth plot (percentile) used to set the y-axis. Points above this cut are drawn in magenta. Default is 0.9.
-
 
 #### Common Parameters for both plots:
 - `bed_filter` : The BED file used to filter the input VCFs.
@@ -55,7 +53,6 @@ sudo apt-get install -y libssl-dev libxml2-dev gcc pkg-config
 
 `tar -czvf R_packages.tar.gz R/library`
 
-
 ## What does this app output?
 This app outputs:
 - `{prefix}.png` : Image of the generated plot in PNG format.
@@ -65,7 +62,6 @@ This app outputs:
 - `{SAMPLE_NAME}.gvcf.baf.tsv` : TSV containing the raw data from the GVCF input. Includes fields Chr, Position, Depth.
 - `{SAMPLE_NAME}.filtered.baf.tsv` : TSV containing the filtered and calculated data from the VCF input before plotting. Includes fields Chr, Position, Depth, Ref_AD, Alt_AD, RAF, BAF.
 - `{SAMPLE_NAME}.binned.baf.tsv` : TSV containing the binned and calculated data from the GVCF input before plotting. Includes fields Chr, Position, mean_depth.
-
 
 ## How to run this app from command line?
 With essential input parameters:
